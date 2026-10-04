@@ -3,7 +3,7 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::Mutex;
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::State;
+use tauri::{AppHandle, Manager, State, WebviewUrl, WebviewWindowBuilder};
 
 struct Shared {
     ffmpeg: Mutex<Option<Child>>,
@@ -127,11 +127,34 @@ fn stop_rtmp(state: State<'_, Shared>) -> Result<(), String> {
     }
 }
 
+#[tauri::command]
+async fn open_projector(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("projector") {
+        let _ = window.unminimize();
+        window.set_focus().map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+    WebviewWindowBuilder::new(&app, "projector", WebviewUrl::App("projector.html".into()))
+        .title("LiteStream - Program Output")
+        .inner_size(1280.0, 720.0)
+        .build()
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+async fn close_projector(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("projector") {
+        window.close().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .manage(Shared { ffmpeg: Mutex::new(None) })
-        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp])
+        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector])
         .run(tauri::generate_context!())
         .expect("error while running LiteStream");
 }

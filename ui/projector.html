@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LiteStream - Program Output</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:#05070a;color:#eef4f7;font-family:system-ui,Segoe UI,sans-serif;overflow:hidden}
+canvas{width:100%;height:100%;object-fit:contain;display:block;background:#05070a}
+.bar{position:absolute;z-index:2;inset:0 0 auto;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 13px;background:linear-gradient(#080d12ed,#080d12b0,transparent);transition:opacity .2s}
+.brand{font-size:12px;font-weight:700;letter-spacing:.3px}
+.status{font-size:10px;color:#78ddc8;margin-left:9px}
+.actions{display:flex;gap:7px}
+.actions button{border:1px solid #3b4b56;background:#111a22;color:#e8f2f5;border-radius:6px;padding:6px 9px;font-size:11px;cursor:pointer}
+.actions button:hover{border-color:#61d7c1}
+html:fullscreen .bar{opacity:0}
+html:fullscreen:hover .bar{opacity:1}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="brand">LiteStream <span class="status">PROGRAM OUTPUT</span></div>
+  <div class="actions"><button id="full">Fullscreen</button><button id="close">Close output</button></div>
+</div>
+<canvas id="feed" width="1280" height="720"></canvas>
+<script>
+(function(){
+  var ch=new BroadcastChannel('litestream-projector');
+  var cv=document.getElementById('feed'),ctx=cv.getContext('2d');
+  ch.onmessage=function(e){
+    var d=e.data;
+    if(!d||d.type!=='frame'||!d.bitmap)return;
+    var b=d.bitmap;
+    if(cv.width!==b.width||cv.height!==b.height){cv.width=b.width;cv.height=b.height}
+    ctx.drawImage(b,0,0);
+    b.close();
+  };
+  function alive(){ch.postMessage({type:'alive'})}
+  alive();setInterval(alive,1000);
+  function toggleFull(){
+    if(document.fullscreenElement){document.exitFullscreen()}
+    else{document.documentElement.requestFullscreen().catch(function(){})}
+  }
+  document.getElementById('full').onclick=toggleFull;
+  cv.ondblclick=toggleFull;
+  document.getElementById('close').onclick=function(){
+    ch.postMessage({type:'closed'});
+    var inv=window.__TAURI__&&window.__TAURI__.core&&window.__TAURI__.core.invoke;
+    if(inv){inv('close_projector')}else{window.close()}
+  };
+  window.addEventListener('pagehide',function(){ch.postMessage({type:'closed'})});
+})();
+</script>
+</body>
+</html>
