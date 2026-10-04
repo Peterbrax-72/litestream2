@@ -1,0 +1,16 @@
+{
+  "name": "litestream-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LiteStream Windows capture studio",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build --bundles nsis",
+    "build:windows": "tauri build --bundles nsis",
+    "build:windows:cross": "tauri build --bundles nsis --runner cargo-xwin --target x86_64-pc-windows-msvc"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

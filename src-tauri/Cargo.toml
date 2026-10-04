@@ -1,0 +1,23 @@
+[package]
+name = "litestream"
+version = "0.1.0"
+description = "LiteStream Windows capture studio"
+authors = ["LiteStream"]
+edition = "2021"
+rust-version = "1.90"
+
+[lib]
+name = "litestream_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+# The generated Windows API binding crate is extremely large. Keep its release
+# compilation memory-friendly on low-resource Linux cross-build hosts; the app
+# itself and the remaining dependencies retain normal release optimization.
+[profile.release.package.windows]
+opt-level = 0
