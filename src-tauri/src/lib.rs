@@ -3,7 +3,7 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::Mutex;
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::{AppHandle, Manager, State, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, PhysicalPosition, State, WebviewUrl, WebviewWindowBuilder};
 
 struct Shared {
     ffmpeg: Mutex<Option<Child>>,
@@ -127,18 +127,48 @@ fn stop_rtmp(state: State<'_, Shared>) -> Result<(), String> {
     }
 }
 
+fn place_projector(window: &tauri::WebviewWindow, x: Option<i32>, y: Option<i32>, fullscreen: bool) {
+    let _ = window.set_fullscreen(false);
+    if let (Some(x), Some(y)) = (x, y) {
+        let _ = window.set_position(PhysicalPosition::new(x, y));
+    }
+    if fullscreen {
+        let _ = window.set_fullscreen(true);
+    }
+    let _ = window.set_focus();
+}
+
 #[tauri::command]
-async fn open_projector(app: AppHandle) -> Result<(), String> {
+fn list_monitors(app: AppHandle) -> Vec<(String, i32, i32, u32, u32, bool)> {
+    let primary = app.primary_monitor().ok().flatten();
+    let list = app.available_monitors().unwrap_or_default();
+    list.iter()
+        .enumerate()
+        .map(|(i, m)| {
+            let is_primary = match &primary {
+                Some(p) => p.position() == m.position() && p.size() == m.size(),
+                None => i == 0,
+            };
+            let name = m.name().cloned().unwrap_or_else(|| format!("Display {}", i + 1));
+            (name, m.position().x, m.position().y, m.size().width, m.size().height, is_primary)
+        })
+        .collect()
+}
+
+#[tauri::command]
+async fn open_projector(app: AppHandle, x: Option<i32>, y: Option<i32>, fullscreen: Option<bool>) -> Result<(), String> {
+    let fs = fullscreen.unwrap_or(false);
     if let Some(window) = app.get_webview_window("projector") {
         let _ = window.unminimize();
-        window.set_focus().map_err(|e| e.to_string())?;
+        place_projector(&window, x, y, fs);
         return Ok(());
     }
-    WebviewWindowBuilder::new(&app, "projector", WebviewUrl::App("projector.html".into()))
+    let window = WebviewWindowBuilder::new(&app, "projector", WebviewUrl::App("projector.html".into()))
         .title("LiteStream - Program Output")
         .inner_size(1280.0, 720.0)
         .build()
         .map_err(|e| e.to_string())?;
+    place_projector(&window, x, y, fs);
     Ok(())
 }
 
@@ -154,7 +184,7 @@ async fn close_projector(app: AppHandle) -> Result<(), String> {
 pub fn run() {
     tauri::Builder::default()
         .manage(Shared { ffmpeg: Mutex::new(None) })
-        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector])
+        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector, list_monitors])
         .run(tauri::generate_context!())
         .expect("error while running LiteStream");
 }

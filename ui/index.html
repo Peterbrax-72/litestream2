@@ -83,6 +83,27 @@ input[type=range]{accent-color:#5eead4}
 .panel-drag-handle:active{cursor:grabbing}
 .panel-dragging{opacity:.45;transform:scale(.985);border-color:var(--cyan)!important}
 .panel-drop-target{outline:2px dashed #5eead4cc;outline-offset:3px;background:#5eead40f!important}
+/* fit-to-screen layout */
+html,body{height:100%;overflow:hidden}
+.app{max-width:none!important;height:100vh;min-height:0!important;padding:0 14px 12px!important;display:flex;flex-direction:column}
+.workspace{flex:1;min-height:0;grid-template-columns:minmax(0,1fr) 520px!important;gap:12px!important;padding-top:10px!important}
+.main-col{display:flex;flex-direction:column;gap:10px;min-height:0}
+.main-col>*{margin:0!important;flex:none}
+.main-col .director-card{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.dual-preview{flex:1;min-height:0}
+.feed-card{display:flex;flex-direction:column;min-height:0}
+.preview-stage{flex:1;min-height:0!important;padding:8px!important}
+.preview-stage canvas{max-width:100%;max-height:100%;width:auto;height:auto;aspect-ratio:16/9}
+.section-title{font-size:20px!important}
+.scene-source-grid{grid-template-columns:1fr 1fr!important}
+.list{max-height:78px;overflow:auto}
+.footer,.panel.tip{display:none!important}
+.side{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;align-content:start;min-height:0;overflow:auto;padding-right:2px}
+.side .panel{padding:10px 12px!important}
+.side .panel:nth-child(2){grid-column:1/-1}
+.quick-actions{grid-template-columns:1fr 1fr;gap:6px!important}
+.quick-actions .btn{padding:8px 9px!important;font-size:12px}
+.quick-actions .shortcut{display:none}
 </style>
 </head>
 <body>
