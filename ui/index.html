@@ -104,6 +104,20 @@ html,body{height:100%;overflow:hidden}
 .quick-actions{grid-template-columns:1fr 1fr;gap:6px!important}
 .quick-actions .btn{padding:8px 9px!important;font-size:12px}
 .quick-actions .shortcut{display:none}
+/* roomy sidebar + collapsible panels */
+.workspace{grid-template-columns:minmax(0,1fr) 370px!important}
+.side{display:flex!important;flex-direction:column;gap:10px!important;overflow-y:auto;overflow-x:hidden}
+.side>*{flex:none!important;min-width:0}
+.side .panel:nth-child(2){grid-column:auto}
+.side .panel *{min-width:0}
+.side .panel [class*="row"],.side .panel [class*="actions"],.side .panel [class*="controls"],.side .panel [class*="buttons"]{flex-wrap:wrap}
+.side .panel button,.side .panel select{max-width:100%}
+.quick-actions{grid-template-columns:1fr 1fr!important}
+.side-title{cursor:pointer;user-select:none}
+.side-title strong::before{content:"\25BE";display:inline-block;margin-right:7px;color:#5eead4;font-size:11px;transition:transform .15s}
+.panel.collapsed .side-title strong::before{transform:rotate(-90deg)}
+.panel.collapsed>:not(.side-title){display:none!important}
+.panel.collapsed .side-title{margin-bottom:0!important}
 </style>
 </head>
 <body>
@@ -151,7 +165,7 @@ html,body{height:100%;overflow:hidden}
     <section class="panel presentation-panel"><div class="side-title"><strong>Presentation</strong><span class="status-badge" id="pptxStatus">No deck</span></div><div class="presentation-title" id="pptxDeckName">Import a PowerPoint deck</div><div class="slide-controls"><button class="btn" id="previousSlideBtn" disabled aria-label="Previous slide">←</button><span id="slideCounter">— / —</span><button class="btn" id="nextSlideBtn" disabled aria-label="Next slide">→</button></div><div class="transform-actions"><button class="btn" id="importPptxBtn">Import .pptx</button><button class="btn" id="takeSlideBtn" disabled>Show in Preview</button></div><p class="transform-note">Slides are staged in Preview; click CUT to publish them to Program.</p></section>
     <section class="panel text-format-panel"><div class="side-title"><strong>Text formatting</strong><span class="status-badge" id="textEditStatus">Select text</span></div><label class="field"><span>Text source</span><select id="textSourceSelect"><option value="">No text source</option></select></label><label class="field"><span>Text content</span><input id="textContentInput" type="text" maxlength="240" disabled></label><div class="format-grid"><label class="field"><span>Font</span><select id="textFontSelect" disabled><option value="system-ui">System Sans</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option><option value="Impact">Impact</option><option value="monospace">Monospace</option></select></label><label class="field"><span>Alignment</span><select id="textAlignSelect" disabled><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label></div><label class="field color-field"><span>Text color</span><input id="textColorInput" type="color" value="#ffffff" disabled></label><label class="field size-field"><span>Size <b id="textSizeValue">42 px</b></span><input id="textSizeInput" type="range" min="18" max="96" step="2" value="42" disabled></label><div class="format-toggles"><label><input id="textBoldInput" type="checkbox" disabled> Bold</label><label><input id="textItalicInput" type="checkbox" disabled> Italic</label><label><input id="textBgInput" type="checkbox" checked disabled> Backplate</label></div><label class="field color-field"><span>Backplate color</span><input id="textBgColorInput" type="color" value="#101820" disabled></label><p class="transform-note">Drag text on the Preview canvas to move it. Drag the cyan corner grip to resize. CUT commits the edit.</p><p class="transform-note" id="textCitationHint">Bible passage attribution appears here when a passage is selected.</p></section>
     <section class="panel tip"><div class="side-title"><strong>Built to stay light</strong><span class="tip-icon">✳</span></div><p>LiteStream captures and composites on-device. <b>No account or cloud upload required.</b> Keep your scenes simple for smoother performance on older hardware.</p></section>
-    <section class="panel"><div class="side-title"><strong>Capture info</strong></div><div class="system-row"><span>Canvas size</span><b id="canvasInfo">1280 × 720</b></div><div class="system-row"><span>Frame rate</span><b id="fpsInfo">30 fps</b></div><div class="system-row"><span>Container</span><b>WebM</b></div><div class="system-row"><span>Streaming</span><b>RTMP / RTMPS</b></div></section>
+    <div id="captureInfoStore" hidden><div class="system-row"><span>Canvas size</span><b id="canvasInfo">1280 × 720</b></div><div class="system-row"><span>Frame rate</span><b id="fpsInfo">30 fps</b></div><div class="system-row"><span>Container</span><b>WebM</b></div><div class="system-row"><span>Streaming</span><b>RTMP / RTMPS</b></div></div>
    </aside>
   </div>
 </div>

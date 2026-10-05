@@ -2,7 +2,7 @@
 name = "litestream"
 version = "0.1.0"
 description = "LiteStream Windows capture studio"
-authors = ["LiteStream"]
+authors = ["pinchezmedia254"]
 edition = "2021"
 rust-version = "1.90"
 

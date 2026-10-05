@@ -30,6 +30,8 @@
     "targets": ["nsis"],
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
     "category": "Video",
+    "publisher": "pinchezmedia254",
+    "copyright": "Copyright (c) 2026 pinchezmedia254",
     "shortDescription": "Lightweight screen recording and streaming studio",
     "longDescription": "LiteStream is a lightweight Windows capture studio for recording, local video playback, presentations, and RTMP streaming.",
     "windows": {
