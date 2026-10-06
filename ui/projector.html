@@ -17,6 +17,10 @@ canvas{width:100%;height:100%;object-fit:contain;display:block;background:#05070
 .actions button:hover{border-color:#61d7c1}
 html:fullscreen .bar{opacity:0}
 html:fullscreen:hover .bar{opacity:1}
+.bar{opacity:0;pointer-events:none}
+.bar.show{opacity:1;pointer-events:auto}
+body{cursor:none}
+body.active{cursor:default}
 </style>
 </head>
 <body>
@@ -28,27 +32,39 @@ html:fullscreen:hover .bar{opacity:1}
 <script>
 (function(){
   var T=window.__TAURI__,ev=T&&T.event,inv=T&&T.core&&T.core.invoke;
+  var ch=typeof BroadcastChannel==='function'?new BroadcastChannel('litestream-projector'):null;
   var cv=document.getElementById('feed'),ctx=cv.getContext('2d'),stat=document.getElementById('stat');
-  var busy=false,pending=null,count=0,lastFrame=0;
-  function render(url){
-    if(busy){pending=url;return}
-    busy=true;
-    var img=new Image();
-    img.onload=function(){
-      if(cv.width!==img.naturalWidth||cv.height!==img.naturalHeight){cv.width=img.naturalWidth;cv.height=img.naturalHeight}
-      ctx.drawImage(img,0,0);count++;lastFrame=Date.now();busy=false;
-      if(pending){var p=pending;pending=null;render(p)}
-    };
-    img.onerror=function(){busy=false};
-    img.src=url;
+  var busy=false,pending=null,count=0,lastFrame=0,viaCh=false,via='';
+  function paint(src,w,h){
+    if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}
+    ctx.drawImage(src,0,0);count++;lastFrame=Date.now();
   }
-  if(ev)ev.listen('ls-frame',function(e){render(e.payload)});
+  function next(){busy=false;if(pending){var p=pending;pending=null;render(p)}}
+  function render(src){
+    if(busy){pending=src;return}
+    busy=true;
+    if(typeof src==='string'){
+      var img=new Image();
+      img.onload=function(){paint(img,img.naturalWidth,img.naturalHeight);next()};
+      img.onerror=next;img.src=src;
+    }else{
+      createImageBitmap(src).then(function(b){paint(b,b.width,b.height);b.close();next()}).catch(next);
+    }
+  }
+  if(ch)ch.onmessage=function(e){
+    var d=e.data;
+    if(d&&d.type==='frame'&&d.blob){
+      if(!viaCh){viaCh=true;ch.postMessage({type:'got'})}
+      via='channel';render(d.blob);
+    }
+  };
+  if(ev)ev.listen('ls-frame',function(e){if(!viaCh){via='event';render(e.payload)}});
   setInterval(function(){
     var live=Date.now()-lastFrame<2000;
-    stat.textContent=live?('LIVE \u00B7 '+count+' fps'):'NO SIGNAL';
+    stat.textContent=live?('LIVE \u00B7 '+count+' fps \u00B7 '+via):'NO SIGNAL';
     stat.className='status'+(live?'':' bad');count=0;
   },1000);
-  function alive(){if(ev)ev.emitTo('main','ls-alive',1)}
+  function alive(){if(ch)ch.postMessage({type:'alive'});if(ev)ev.emit('ls-alive',1)}
   alive();setInterval(alive,1000);
   function toggleFull(){
     if(document.fullscreenElement){document.exitFullscreen()}
@@ -56,8 +72,14 @@ html:fullscreen:hover .bar{opacity:1}
   }
   document.getElementById('full').onclick=toggleFull;
   cv.ondblclick=toggleFull;
+  var hideT=null,bar=document.querySelector('.bar');
+  document.addEventListener('mousemove',function(){
+    bar.classList.add('show');document.body.classList.add('active');
+    clearTimeout(hideT);hideT=setTimeout(function(){bar.classList.remove('show');document.body.classList.remove('active')},2500);
+  });
   document.getElementById('close').onclick=function(){
-    if(ev)ev.emitTo('main','ls-closed',1);
+    if(ch)ch.postMessage({type:'closed'});
+    if(ev)ev.emit('ls-closed',1);
     if(inv){inv('close_projector')}else{window.close()}
   };
 })();
