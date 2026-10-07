@@ -203,11 +203,37 @@ fn open_url(url: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn http_get(url: String, headers: Option<Vec<String>>) -> Result<String, String> {
+    if !(url.starts_with("https://api.nlt.to/") || url.starts_with("https://api.scripture.api.bible/")) {
+        return Err("Blocked: this address is not allowed".into());
+    }
+    let mut cmd = Command::new("curl");
+    cmd.args(["-sS", "-f", "-L", "--max-time", "20"]);
+    for h in headers.unwrap_or_default() {
+        if h.contains('\n') || h.contains('\r') {
+            return Err("Invalid header".into());
+        }
+        cmd.arg("-H").arg(h);
+    }
+    cmd.arg(&url);
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
+    let out = cmd.output().map_err(|e| format!("Could not run curl: {}", e))?;
+    if !out.status.success() {
+        return Err(String::from_utf8_lossy(&out.stderr).trim().to_string());
+    }
+    Ok(String::from_utf8_lossy(&out.stdout).to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .manage(Shared { ffmpeg: Mutex::new(None) })
-        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector, list_monitors, open_url])
+        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector, list_monitors, open_url, http_get])
         .run(tauri::generate_context!())
         .expect("error while running LiteStream");
 }
