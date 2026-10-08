@@ -183,6 +183,15 @@ html,body{height:100%;overflow:hidden}
 .transition-styles .ts[data-style="rt"].active{background:#e5484d;color:#fff}
 .transition-button.rt-live{background:linear-gradient(135deg,#ff6b6b,#e5484d)!important;color:#fff!important;box-shadow:0 0 0 2px #e5484d66,0 0 22px #e5484d77!important;animation:rtpulse 1.4s ease-in-out infinite}
 @keyframes rtpulse{50%{box-shadow:0 0 0 4px #e5484d33,0 0 30px #e5484daa}}
+/* clean windows: only the empty-state text */
+.feed-card .preview-footer,.feed-pill{display:none!important}
+.stage-help{gap:0!important}
+.stage-help strong{font-size:16px!important;font-weight:600!important;letter-spacing:.3px;color:#8d9baa!important}
+/* book autocomplete */
+.book-suggest{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.book-suggest:empty{display:none}
+.book-suggest button{border:1px solid #2b3b50;background:#0d131c;color:#c9d4e0;border-radius:999px;padding:4px 11px;font-size:12px;cursor:pointer}
+.book-suggest button:hover,.book-suggest button.on{border-color:#5eead4;color:#5eead4}
 </style>
 </head>
 <body>
@@ -199,13 +208,13 @@ html,body{height:100%;overflow:hidden}
      <div class="dual-preview">
       <div class="feed-card preview-feed">
        <div class="feed-head"><div><div class="feed-kicker">PREVIEW</div><div class="feed-name">Preview scene <strong id="previewSceneName">Main Scene</strong></div></div><span class="feed-pill preview-pill">STAGED</span></div>
-       <div class="preview-stage"><canvas id="previewStage" width="1280" height="720"></canvas><div class="preview-empty"><div class="stage-help show" id="previewHelp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3V9Z"/></svg><strong>Preview is empty</strong><span>Add a source, then take the scene.</span></div></div></div>
+       <div class="preview-stage"><canvas id="previewStage" width="1280" height="720"></canvas><div class="preview-empty"><div class="stage-help show" id="previewHelp"><strong>Preview is empty</strong></div></div></div>
        <div class="preview-footer"><span class="signal"><span class="dot green" id="previewDot"></span><span id="previewStatus">Ready in preview</span></span><span class="feed-resolution" data-resolution>1280 × 720 · 30 FPS</span></div>
       </div>
       <div class="transition-column"><button class="transition-button" id="transitionBtn" title="Transition" aria-label="Transition"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h15m-6-6 6 6-6 6"/></svg><span>Transition</span></button><div class="transition-styles" role="group" aria-label="Transition style"><button class="ts" data-style="fade">Fade</button><button class="ts" data-style="cut">Cut</button><button class="ts" data-style="rt" title="Realtime: Preview drives Program live">RT</button></div></div>
       <div class="feed-card program-feed">
        <div class="feed-head"><div><div class="feed-kicker live-kicker"><span class="tiny-live-dot"></span> PROGRAM</div><div class="feed-name">On air <strong id="programSceneName">Main Scene</strong></div></div><div class="program-head-actions"><button class="projector-small-btn" id="programProjectorBtn" title="Open Program on a connected display">⛶ Projector</button><span class="feed-pill onair-pill">LIVE OUTPUT</span></div></div>
-       <div class="preview-stage"><canvas id="programStage" width="1280" height="720"></canvas><div class="preview-empty"><div class="stage-help show" id="programHelp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3V9Z"/></svg><strong>Program is empty</strong><span>Select a scene and press the arrow to take it live.</span></div></div></div>
+       <div class="preview-stage"><canvas id="programStage" width="1280" height="720"></canvas><div class="preview-empty"><div class="stage-help show" id="programHelp"><strong>Program is empty</strong></div></div></div>
        <div class="preview-footer"><span class="signal"><span class="dot" id="programDot"></span><span id="programStatus">Program is empty</span></span><span id="programClock">00:00:00</span></div>
       </div>
      </div>

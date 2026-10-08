@@ -204,18 +204,12 @@ fn open_url(url: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn http_get(url: String, headers: Option<Vec<String>>) -> Result<String, String> {
-    if !(url.starts_with("https://api.nlt.to/") || url.starts_with("https://api.scripture.api.bible/")) {
+async fn http_get(url: String) -> Result<String, String> {
+    if !url.starts_with("https://api.nlt.to/") {
         return Err("Blocked: this address is not allowed".into());
     }
     let mut cmd = Command::new("curl");
     cmd.args(["-sS", "-f", "-L", "--max-time", "20"]);
-    for h in headers.unwrap_or_default() {
-        if h.contains('\n') || h.contains('\r') {
-            return Err("Invalid header".into());
-        }
-        cmd.arg("-H").arg(h);
-    }
     cmd.arg(&url);
     #[cfg(target_os = "windows")]
     {
