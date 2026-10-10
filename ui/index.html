@@ -227,6 +227,14 @@ html,body{height:100%;overflow:hidden}
 .sc-text{font:13px/1.45 Georgia,serif;color:#cfdced;background:#0e1d33;border:1px solid #1e3a5f;border-radius:8px;padding:8px;margin-top:6px;max-height:110px;overflow:auto}
 .scripture-panel .btn.primary{width:100%;margin-top:8px;background:linear-gradient(135deg,#f4d58d,#e0a93b)!important;color:#10233d!important;font-weight:800}
 .sc-hint{font-size:12px;color:#6f8db3}
+/* folded layout & background */
+.style-fold{margin:8px 0;border:1px solid #223044;border-radius:8px;background:#0a101899}
+.style-fold>summary{cursor:pointer;list-style:none;padding:8px 10px;font-size:12px;font-weight:600;color:#c9d4e0;display:flex;align-items:center;gap:8px;user-select:none}
+.style-fold>summary::-webkit-details-marker{display:none}
+.style-fold>summary::before{content:"\25B8";color:#5eead4;transition:transform .15s}
+.style-fold[open]>summary::before{transform:rotate(90deg)}
+.style-fold>:not(summary){margin-left:10px;margin-right:10px}
+.style-fold>.wall-strip:last-of-type,.style-fold>[data-file]{margin-bottom:8px}
 </style>
 </head>
 <body>
