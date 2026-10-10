@@ -1,17 +1,24 @@
 # LiteStream Studio
 
-LiteStream is a lightweight, OBS-inspired capture studio with a dual-canvas **Preview / Program** workflow. Edits are staged in Preview; only the CUT button publishes a snapshot to Program. Recording and streaming use Program, so later Preview edits do not silently alter the output already on air.
+Publisher: pinchezmedia254 (pinchezmedia254.netlify.app)
+
+LiteStream is a lightweight, OBS-inspired capture studio with a dual-canvas **Preview / Program** workflow. Edits are staged in Preview; the Transition button (Fade or Cut) publishes a snapshot to Program, and the RT option makes Program follow Preview live. Recording and streaming use Program, so later Preview edits do not silently alter the output already on air.
 
 ## Features
 
-- Screen/window/tab capture, camera, microphone, local images and video clips (with play/pause, seek, loop, and audio volume), color backdrops, and editable text.
-- Drag and resize text overlays in Preview; adjust their wording, font, size, alignment, color, bold/italic style, and backplate.
-- Source Fit controls for Default, Fit to screen, Fill screen, Stretch, Original size, and 50–200% scale.
-- Reorder sidebar panels by dragging the six-dot handle; keyboard users can focus a panel handle and move it with the Up/Down arrows. Order is saved locally.
-- Import `.pptx` slide decks and navigate slides in Preview. The lightweight browser parser renders text, basic shapes, and embedded images; advanced PowerPoint effects, fonts, transitions, audio/video, and complex charts may not be reproduced exactly.
-- Search for Bible editions listed as Public Domain, CC0, GPL, or Creative Commons Attribution/ShareAlike without NC/ND restrictions in the GetBible catalog; download an edition for local/offline passage lookup and add passages to Preview as editable text. Check source licensing and attribution before publication.
-- Program Projector mirrors the Program canvas in a separate window. Detect/select a display where supported, or move the window to a connected screen and fullscreen it manually.
-- Local WebM recording and a native RTMP sender for one Restream-compatible ingest. Configure destinations at your restream provider; LiteStream sends one upstream Program feed.
+- **Workspace that remembers:** scenes and sources (images, videos, slide decks, Bible verse decks, text and color backdrops) are saved automatically on this PC and reopen as you left them. Screen, camera and microphone sources reappear in the list but must be shared again, because Windows requires a fresh permission each launch. Program always starts empty, so nothing goes on air by accident.
+- Screen/window/tab capture, camera, microphone, local images and video clips (with play/pause, seek, loop and volume), color backdrops, and editable text.
+- **Transitions:** Fade, Cut, or **RT** (realtime), where Program follows Preview instantly. RT is off at every launch.
+- Text overlays always draw above other sources. Drag and resize text and images in Preview with the mouse; scrolling text (horizontal or vertical, adjustable speed) is available in Text formatting.
+- **Source lock:** each source has a padlock that blocks moving, resizing, editing, renaming and removing, to prevent accidents. Click a source's name to rename it when unlocked.
+- Source Fit: Fit to screen (default), Fill, Stretch, Original size and 50-200% scale.
+- **Scripture panel:** a movable, collapsible panel in the right column, like Presentation and Program monitor. Books are split into Old and New Testament lists, with chapters and verses below, plus quick reference search and book autocomplete (`1kings 3:5`, `pet`). Click a verse, Shift-click for a range, or double-click to send that verse and the rest of the chapter as a verse deck (one slide per verse). Choose fullscreen with built-in or uploaded wallpapers, or a lower third over live video. Verse decks can be dragged and resized in Preview. Works with downloaded or imported editions and the online NLT.
+- **Bible editions** (Quick actions → Bible editions / import; used only to add editions): download public-domain editions in the app, or import your own file (.zip, .txt verse-per-line, .usfm or .json) from sources such as eBible.org. The NLT can be added as an online edition through Tyndale's official API (internet required, non-commercial use). NIV and NKJV are copyrighted and are not included.
+- Import `.pptx` slide decks and navigate slides in Preview. The lightweight parser renders text, basic shapes and embedded images; advanced effects, fonts, transitions, audio/video and complex charts may not match PowerPoint.
+- Reorder and collapse sidebar panels (the order is saved).
+- **Program Projector:** right-click the Program window to send the live output fullscreen to any connected display, or use the Projector button. Shows what is on air in a separate window.
+- Local WebM recording and a native RTMP sender for one Restream-compatible ingest.
+- Contact details for the developer (GitHub, WhatsApp, email, website) are in Settings.
 
 ## Important: RTMP requirements
 
@@ -58,4 +65,4 @@ This release is configured to build a Windows NSIS installer (`.exe`) only. macO
 
 ## Privacy and security
 
-Capture permissions are requested after the user starts a source. Media composition and recording are local. When broadcasting, Program media is sent to the RTMP/RTMPS endpoint and key supplied by the user. Bible catalog/text requests go to GetBible; downloaded editions remain in local browser/webview storage. Do not share stream keys.
+Capture permissions are requested after the user starts a source. Media composition and recording are local. When broadcasting, Program media is sent to the RTMP/RTMPS endpoint and key supplied by the user. Bible catalog requests go to GetBible and NLT lookups to api.nlt.to; downloaded and imported editions, and your saved workspace, remain in local webview storage on this PC. Do not share stream keys.

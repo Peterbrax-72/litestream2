@@ -197,6 +197,36 @@ html,body{height:100%;overflow:hidden}
 .lock-control.on{opacity:1;color:#f4b942}
 .source-row.locked .row-name{cursor:not-allowed;color:#f4d58d}
 .source-row.locked{box-shadow:inset 3px 0 0 #f4b942}
+/* scripture panel (sidebar, VideoPsalm style) */
+.scripture-panel{background:linear-gradient(180deg,#0f2036,#0b1626)!important;border-color:#2a4468!important}
+.scripture-panel .side-title strong{color:#f4d58d;font-family:Georgia,serif;letter-spacing:.6px}
+.scripture-panel h4{margin:10px 2px 4px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:#6f8db3}
+.sc-top{display:grid;gap:8px;margin-bottom:8px}
+.sc-top select,.sc-top input{width:100%;box-sizing:border-box;background:#0b1626!important;border:1px solid #2a4468!important;color:#e9eef5;border-radius:6px!important;padding:7px 10px}
+.sc-ref{position:relative}
+.sc-suggest{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.sc-suggest:empty{display:none}
+.sc-suggest button{border:1px solid #2a4468;background:#10233d;color:#f4d58d;border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer}
+.sc-books{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sc-col{position:relative;max-height:175px;overflow:auto;background:#0b1626;border:1px solid #1e3a5f;border-radius:8px;padding:0 4px 4px}
+.sc-col h4{position:sticky;top:0;z-index:1;margin:0;padding:6px 4px 4px;background:#0b1626}
+.sc-book{display:block;width:100%;text-align:left;background:none;border:0;color:#cfdced;padding:5px 8px;border-radius:5px;font-size:12.5px;cursor:pointer;font-family:Georgia,serif}
+.sc-book:hover{background:#16315a}
+.sc-book.on{background:#f4d58d;color:#10233d;font-weight:700}
+.sc-chapters{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-height:100px;overflow:auto;padding:2px}
+.sc-chapters button{background:#10233d;border:1px solid #1e3a5f;color:#cfdced;border-radius:5px;padding:5px 0;font-size:11.5px;cursor:pointer}
+.sc-chapters button:hover{border-color:#f4d58d}
+.sc-chapters button.on{background:#f4d58d;color:#10233d;font-weight:700}
+.sc-verses{position:relative;max-height:260px;overflow:auto;border:1px solid #1e3a5f;border-radius:8px;background:#0b1626}
+.sc-verse{display:flex;gap:8px;padding:7px 10px;cursor:pointer;font-family:Georgia,serif;font-size:14px;line-height:1.4;color:#e4ebf4;user-select:none}
+.sc-verse:hover{background:#12294a}
+.sc-verse.sel{background:#1d4278;box-shadow:inset 3px 0 0 #f4d58d}
+.sc-verse b{color:#f4d58d;min-width:20px;font-family:system-ui;font-size:11px;padding-top:3px}
+.sc-sum{margin:10px 0 4px}
+.sc-ref-title{font:700 17px Georgia,serif;color:#f4d58d}
+.sc-text{font:13px/1.45 Georgia,serif;color:#cfdced;background:#0e1d33;border:1px solid #1e3a5f;border-radius:8px;padding:8px;margin-top:6px;max-height:110px;overflow:auto}
+.scripture-panel .btn.primary{width:100%;margin-top:8px;background:linear-gradient(135deg,#f4d58d,#e0a93b)!important;color:#10233d!important;font-weight:800}
+.sc-hint{font-size:12px;color:#6f8db3}
 </style>
 </head>
 <body>
@@ -237,7 +267,8 @@ html,body{height:100%;overflow:hidden}
    </main>
    <aside class="side">
     <section class="panel"><div class="side-title"><strong>Session status</strong><span class="status-badge" id="sessionBadge">Ready</span></div><div class="stat-grid"><div class="stat"><div class="stat-label">Elapsed</div><div class="stat-value" id="elapsedStat">00:00<span> hh:mm</span></div></div><div class="stat"><div class="stat-label">Output</div><div class="stat-value" id="outputStat">720p<span> · 30fps</span></div></div><div class="stat"><div class="stat-label">Recording</div><div class="stat-value" id="recordStat">Off</div></div><div class="stat"><div class="stat-label">Live stream</div><div class="stat-value" id="liveStat">Off</div></div></div></section>
-    <section class="panel"><div class="side-title"><strong>Quick actions</strong></div><div class="quick-actions"><button class="btn" id="quickScreen"><span>＋ &nbsp; Share a screen</span><span class="shortcut">SOURCE</span></button><button class="btn" id="quickCamera"><span>＋ &nbsp; Add a camera</span><span class="shortcut">SOURCE</span></button><button class="btn" id="openVideoBtn"><span>▶ &nbsp; Import a video file</span><span class="shortcut">VIDEO</span></button><button class="btn" id="openPptxBtn"><span>▤ &nbsp; Open presentation (.pptx)</span><span class="shortcut">SLIDES</span></button><button class="btn" id="openBibleBtn"><span>✦ &nbsp; Bible search / import</span><span class="shortcut">BIBLE</span></button><button class="btn" id="liveBtn"><span><span id="liveActionDot" class="dot"></span> &nbsp; <span id="liveActionText">Go live</span></span><span class="shortcut">RTMP</span></button></div></section>
+    <section class="panel"><div class="side-title"><strong>Quick actions</strong></div><div class="quick-actions"><button class="btn" id="quickScreen"><span>＋ &nbsp; Share a screen</span><span class="shortcut">SOURCE</span></button><button class="btn" id="quickCamera"><span>＋ &nbsp; Add a camera</span><span class="shortcut">SOURCE</span></button><button class="btn" id="openVideoBtn"><span>▶ &nbsp; Import a video file</span><span class="shortcut">VIDEO</span></button><button class="btn" id="openPptxBtn"><span>▤ &nbsp; Open presentation (.pptx)</span><span class="shortcut">SLIDES</span></button><button class="btn" id="openScriptureBtn"><span>Scripture panel</span><span class="shortcut">VERSES</span></button><button class="btn" id="openBibleBtn"><span>✦ &nbsp; Bible editions / import</span><span class="shortcut">BIBLE</span></button><button class="btn" id="liveBtn"><span><span id="liveActionDot" class="dot"></span> &nbsp; <span id="liveActionText">Go live</span></span><span class="shortcut">RTMP</span></button></div></section>
+    <section class="panel scripture-panel"><div class="side-title"><strong>Scripture</strong></div><div id="scBody"></div></section>
     <section class="panel transform-panel"><div class="side-title"><strong>Source fit</strong><span class="status-badge">PREVIEW</span></div><label class="field"><span>Selected visual source</span><select id="transformSource"><option value="">No visual source selected</option></select></label><label class="field"><span>Fit mode</span><select id="fitMode" disabled><option value="contain">Fit to screen</option><option value="cover">Fill screen</option><option value="stretch">Stretch to screen</option><option value="native">Original size</option><option value="default">Auto</option></select></label><label class="field scale-field"><span>Scale <b id="scaleValue">100%</b></span><input id="sourceScale" type="range" min="50" max="200" step="5" value="100" disabled></label><div class="transform-actions"><button class="btn" id="fitToScreenBtn" disabled>Fit to screen</button><button class="btn" id="resetTransformBtn" disabled>Reset</button></div></section>
     <section class="panel video-panel"><div class="side-title"><strong>Video playback</strong><span class="status-badge" id="videoStatus">No video</span></div><label class="field"><span>Preview video source</span><select id="videoSourceSelect"><option value="">No video source</option></select></label><div class="video-source-name" id="videoName">Import a local video to begin</div><div class="video-transport"><button class="btn primary" id="videoPlayBtn" disabled>▶ Play</button><button class="btn" id="videoPauseBtn" disabled>Pause</button><button class="btn" id="videoOpenBtn">Import video</button></div><label class="field video-seek-field"><span>Position</span><input id="videoSeek" type="range" min="0" max="1000" step="1" value="0" disabled></label><div class="video-time-row"><span id="videoClock">00:00 / 00:00</span><label><input id="videoLoopInput" type="checkbox" disabled> Loop</label></div><label class="field video-volume-field"><span>Video volume <b id="videoVolumeValue">80%</b></span><input id="videoVolume" type="range" min="0" max="100" step="1" value="80" disabled></label></section>
     <section class="panel projector-panel"><div class="side-title"><strong>Program monitor</strong><span class="status-badge" id="projectorStatus">Closed</span></div><label class="field"><span>Connected display</span><select id="outputDisplay"><option value="manual">Move the output window manually</option></select></label><div class="projector-actions"><button class="btn primary" id="openProjectorBtn">Open Program window</button><button class="btn" id="findDisplaysBtn">Detect displays</button></div><p class="transform-note" id="displayHint"></p><button class="add-btn close-projector" id="closeProjectorBtn" disabled>Close Program window</button></section>
