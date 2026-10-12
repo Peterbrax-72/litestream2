@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main, master]
+    tags: ['v*']
     paths:
       - 'ui/**'
       - 'src-tauri/**'
@@ -12,9 +13,19 @@ on:
       - '.github/workflows/windows-installer.yml'
 
 permissions:
-  contents: read
+  contents: write
+
+env:
+  # Optional code signing (Azure Artifact Signing). Leave the secrets unset to build unsigned.
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  SIGN_ENDPOINT: ${{ secrets.AZURE_SIGN_ENDPOINT }}
+  SIGN_ACCOUNT: ${{ secrets.AZURE_SIGN_ACCOUNT }}
+  SIGN_PROFILE: ${{ secrets.AZURE_SIGN_PROFILE }}
 
 jobs:
+  # Normal installer (small, downloads WebView2 if missing)
   build-nsis:
     runs-on: windows-latest
     steps:
@@ -44,3 +55,72 @@ jobs:
           path: src-tauri/target/release/bundle/nsis/*.exe
           if-no-files-found: error
           retention-days: 14
+
+  # Microsoft Store installer: offline (WebView2 embedded), silent-capable, per-user, optionally signed
+  build-store:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Rust MSVC toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install Node dependencies
+        run: npm install --include=dev
+
+      - name: Install signing tool
+        if: env.AZURE_CLIENT_ID != '' && env.SIGN_ENDPOINT != ''
+        run: cargo install artifact-signing-cli --locked
+
+      - name: Write signing config
+        if: env.AZURE_CLIENT_ID != '' && env.SIGN_ENDPOINT != ''
+        shell: pwsh
+        run: |
+          $cmd = "artifact-signing-cli -e $env:SIGN_ENDPOINT -a $env:SIGN_ACCOUNT -c $env:SIGN_PROFILE -d LiteStream %1"
+          $cfg = Get-Content src-tauri/tauri.microsoftstore.conf.json -Raw | ConvertFrom-Json
+          $cfg.bundle.windows | Add-Member -NotePropertyName signCommand -NotePropertyValue $cmd
+          $cfg | ConvertTo-Json -Depth 8 | Set-Content -Path src-tauri/tauri.store-signed.conf.json
+          echo "SIGNED=true" >> $env:GITHUB_ENV
+
+      - name: Build Store installer (signed)
+        if: env.SIGNED == 'true'
+        run: npx tauri build --bundles nsis --config src-tauri/tauri.store-signed.conf.json
+
+      - name: Build Store installer (unsigned)
+        if: env.SIGNED != 'true'
+        run: npx tauri build --bundles nsis --config src-tauri/tauri.microsoftstore.conf.json
+
+      - name: Rename installer
+        shell: pwsh
+        run: |
+          $f = Get-ChildItem src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
+          $new = $f.Name -replace '^LiteStream', 'LiteStream-Store'
+          Rename-Item $f.FullName $new
+          Write-Host "Store installer: $new"
+
+      - name: Upload Store installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: LiteStream-Store-Installer
+          path: src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $f = Get-ChildItem src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
+          gh release create "${{ github.ref_name }}" $f.FullName --title "LiteStream ${{ github.ref_name }}" --notes "Store installer. Use the asset URL in Partner Center." 
+          $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$($f.Name)"
+          "Package URL for Partner Center: $url" >> $env:GITHUB_STEP_SUMMARY
