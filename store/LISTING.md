@@ -51,3 +51,10 @@ No violence, no mature content, no user-generated content sharing, no purchases,
 3. `git tag v0.1.0 && git push origin v0.1.0` -> workflow builds the Store installer and publishes a GitHub Release
 4. Test on a clean Windows PC under a standard user: `LiteStream-Store_0.1.0_x64-setup.exe /S`, check Start menu + Apps list, uninstall cleanly
 5. Create the product in Partner Center, paste the Package URL, submit
+
+## MSIX route (current)
+1. In Partner Center create a new **MSIX or PWA app** and reserve the name "Litestream" (delete the old Win32 app first).
+2. Product management > Product identity: copy Package/Identity/Name, Package/Identity/Publisher (CN=...), Package/Properties/PublisherDisplayName.
+3. GitHub repo > Settings > Secrets and variables > Actions > **Variables**: add MSIX_IDENTITY_NAME, MSIX_PUBLISHER, MSIX_PUBLISHER_DISPLAY.
+4. Run the "Windows installer" workflow; download artifact **LiteStream-Store-MSIX** (LiteStream_0.1.0.0_x64.msix).
+5. Submission > Packages: upload the .msix. Microsoft signs it. No URL or hosting needed.

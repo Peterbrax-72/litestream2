@@ -9,6 +9,7 @@ on:
       - 'ui/**'
       - 'src-tauri/**'
       - 'package.json'
+      - 'store/**'
       - 'build-windows.ps1'
       - '.github/workflows/windows-installer.yml'
 
@@ -124,3 +125,42 @@ jobs:
           gh release create "${{ github.ref_name }}" $f.FullName --title "LiteStream ${{ github.ref_name }}" --notes "Store installer. Use the asset URL in Partner Center." 
           $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/$($f.Name)"
           "Package URL for Partner Center: $url" >> $env:GITHUB_STEP_SUMMARY
+
+  # Microsoft Store MSIX package (Microsoft signs it on submission, no certificate needed)
+  build-msix:
+    runs-on: windows-latest
+    env:
+      MSIX_IDENTITY_NAME: ${{ vars.MSIX_IDENTITY_NAME }}
+      MSIX_PUBLISHER: ${{ vars.MSIX_PUBLISHER }}
+      MSIX_PUBLISHER_DISPLAY: ${{ vars.MSIX_PUBLISHER_DISPLAY }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Rust MSVC toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install Node dependencies
+        run: npm install --include=dev
+
+      - name: Build release exe (no installer)
+        run: npx tauri build --no-bundle
+
+      - name: Package MSIX
+        shell: pwsh
+        run: ./store/build-msix.ps1
+
+      - name: Upload MSIX
+        uses: actions/upload-artifact@v4
+        with:
+          name: LiteStream-Store-MSIX
+          path: out/*.msix
+          if-no-files-found: error
+          retention-days: 30
