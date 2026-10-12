@@ -16,22 +16,8 @@ Copy-Item $exe "$layout/LiteStream.exe"
 
 # Tile / logo images made from the app icon
 python -m pip install --quiet pillow
-python - <<'PY'
-from PIL import Image
-src = Image.open('src-tauri/icons/icon.png').convert('RGBA')
-def tile(name, w, h, scale=0.7):
-    bg = Image.new('RGBA', (w, h), (10, 22, 38, 255))
-    s = int(min(w, h) * scale)
-    ic = src.resize((s, s), Image.LANCZOS)
-    bg.paste(ic, ((w - s) // 2, (h - s) // 2), ic)
-    bg.save(f'msix-layout/Assets/{name}.png')
-tile('StoreLogo', 50, 50, 0.9)
-tile('Square44x44Logo', 44, 44, 0.9)
-tile('Square71x71Logo', 71, 71)
-tile('Square150x150Logo', 150, 150)
-tile('Wide310x150Logo', 310, 150, 0.8)
-tile('Square310x310Logo', 310, 310)
-PY
+python store/make-msix-assets.py
+if ($LASTEXITCODE -ne 0) { throw 'asset generation failed' }
 
 $manifest = @"
 <?xml version="1.0" encoding="utf-8"?>
