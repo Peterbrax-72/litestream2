@@ -5,6 +5,8 @@ foreach ($n in 'MSIX_IDENTITY_NAME','MSIX_PUBLISHER','MSIX_PUBLISHER_DISPLAY') {
   if (-not (Get-Item "env:$n" -ErrorAction SilentlyContinue).Value) { throw "Missing repository variable $n (Settings > Secrets and variables > Actions > Variables)" }
 }
 $pkg = Get-Content package.json -Raw | ConvertFrom-Json
+$tauriVer = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+if ($tauriVer -ne $pkg.version) { throw "Version mismatch: package.json $($pkg.version) vs tauri.conf.json $tauriVer. Run: python store/bump-version.py X.Y.Z" }
 $ver = "$($pkg.version).0"                      # Store requires 4-part version; last part must be 0
 $exe = 'src-tauri/target/release/litestream.exe'
 if (-not (Test-Path $exe)) { throw "Built exe not found: $exe" }
