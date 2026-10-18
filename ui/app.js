@@ -354,4 +354,25 @@ function buildClock(){const root=$('#ckBody');if(!root||root.dataset.built)retur
   $('#ckCdReset').onclick=()=>setCd(ckCountdownTotal()||CK.cdSec);
   $('#ckAddClock').onclick=()=>ckAddSource('time');$('#ckAddCd').onclick=()=>ckAddSource('count');ckTick()}
 buildClock();setInterval(ckTick,250);
+
+/* ===== Right-click in Preview: source fit options ===== */
+function showPreviewMenu(e){e.preventDefault();hideCtx();const scene=getScene(state.previewScene);if(!scene)return;
+  const choices=scene.sources.filter(en=>transformable(en)&&sourceVisible(en)!==false);
+  const m=document.createElement('div');m.id='ctxMenu';m.className='ctx-menu';
+  const head=t=>{const d=document.createElement('div');d.className='ctx-head';d.textContent=t;m.appendChild(d)};
+  const add=(label,fn,on)=>{const b=document.createElement('button');b.textContent=(on?'✓ ':' ')+label;b.onclick=()=>{hideCtx();fn()};m.appendChild(b)};
+  if(!choices.length){head('Source fit');const n=document.createElement('div');n.className='ctx-head';n.style.opacity='.7';n.textContent='Add a screen, camera, image, video or slides first';m.appendChild(n)}
+  else{
+    let target=null;const pt=canvasPoint(e);try{const ih=imageAtPoint(pt);if(ih&&choices.includes(ih.entry))target=ih.entry}catch(err){}
+    if(!target)target=choices.find(en=>sourceKey(en)===state.selectedSource)||choices[choices.length-1];
+    const pick=en=>{state.selectedSource=sourceKey(en);if(sourceType(en)==='image')state.selectedImageId=en.id};
+    pick(target);
+    if(choices.length>1){head('Source');choices.forEach(en=>add(sourceDetails(en)[0],()=>{pick(en);updateStatus();toast('Selected '+sourceDetails(en)[0])},en===target))}
+    const tr=getTransform(scene,target);head('Fit: '+sourceDetails(target)[0]);
+    [['contain','Fit to screen'],['cover','Fill screen'],['stretch','Stretch to screen'],['native','Original size'],['default','Auto']].forEach(([v,l])=>add(l,()=>{pick(target);applySelectedTransform({fit:v})},(tr.fit||'contain')===v));
+    head('Scale');[50,75,100,125,150,200].forEach(v=>add(v+'%',()=>{pick(target);applySelectedTransform({scale:v})},(tr.scale||100)===v));
+    add('Reset',()=>{pick(target);applySelectedTransform({fit:'contain',scale:100})});
+  }
+  document.body.appendChild(m);const r=m.getBoundingClientRect();m.style.left=Math.max(8,Math.min(e.clientX,innerWidth-r.width-8))+'px';m.style.top=Math.max(8,Math.min(e.clientY,innerHeight-r.height-8))+'px'}
+{const pf=document.querySelector('.preview-feed');if(pf)pf.addEventListener('contextmenu',showPreviewMenu)}
 })();
