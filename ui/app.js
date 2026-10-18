@@ -308,4 +308,39 @@ async function toggleMic(){
 }
 {const mm=$('#micMute');if(mm)mm.onclick=toggleMic}
 setInterval(syncMicToggle,500);syncMicToggle();
+
+/* ===== Clock: world time + countdown (works offline, uses the PC clock) ===== */
+const CK={tz:'',h24:true,sound:true,mode:'clock',cdSec:300,cd:{running:false,remain:300,endAt:0}};
+try{const s=JSON.parse(localStorage.getItem('ls-clock')||'{}');if(typeof s.tz==='string')CK.tz=s.tz;if(typeof s.h24==='boolean')CK.h24=s.h24;if(typeof s.sound==='boolean')CK.sound=s.sound;if(Number.isFinite(s.cdSec)&&s.cdSec>0){CK.cdSec=s.cdSec;CK.cd.remain=s.cdSec}}catch(e){}
+function ckSave(){try{localStorage.setItem('ls-clock',JSON.stringify({tz:CK.tz,h24:CK.h24,sound:CK.sound,cdSec:CK.cdSec}))}catch(e){}}
+function ckZones(){let z=[];try{if(Intl.supportedValuesOf)z=Intl.supportedValuesOf('timeZone')}catch(e){}if(!z.length)z=['Africa/Nairobi','Africa/Lagos','Africa/Johannesburg','Africa/Cairo','Europe/London','Europe/Paris','Europe/Moscow','Asia/Dubai','Asia/Kolkata','Asia/Singapore','Asia/Tokyo','Australia/Sydney','Pacific/Auckland','America/Sao_Paulo','America/New_York','America/Chicago','America/Denver','America/Los_Angeles'];if(!z.includes('UTC'))z.unshift('UTC');return z}
+function ckTime(){const d=new Date();const o={hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:CK.h24?'h23':'h12'};if(CK.tz)o.timeZone=CK.tz;try{return new Intl.DateTimeFormat('en-GB',o).format(d)}catch(e){return d.toLocaleTimeString()}}
+function ckDate(){const o={weekday:'short',day:'numeric',month:'short',year:'numeric'};if(CK.tz)o.timeZone=CK.tz;try{return new Intl.DateTimeFormat('en-GB',o).format(new Date())}catch(e){return ''}}
+function ckPad(n){return String(n).padStart(2,'0')}
+function ckRemain(){return CK.cd.running?Math.max(0,Math.ceil((CK.cd.endAt-performance.now())/1000)):CK.cd.remain}
+function ckFmt(s){return ckPad(Math.floor(s/3600))+':'+ckPad(Math.floor(s%3600/60))+':'+ckPad(s%60)}
+function ckBeep(){try{const a=new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(.0001,a.currentTime+t);g.gain.exponentialRampToValueAtTime(.25,a.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+t+.28);o.start(a.currentTime+t);o.stop(a.currentTime+t+.3)});setTimeout(()=>a.close(),1500)}catch(e){}}
+function ckCountdownTotal(){return Math.max(0,Math.min(99*3600+59*60+59,(Number($('#ckH').value)||0)*3600+(Number($('#ckM').value)||0)*60+(Number($('#ckS').value)||0)))}
+function ckSetInputs(sec){$('#ckH').value=Math.floor(sec/3600);$('#ckM').value=Math.floor(sec%3600/60);$('#ckS').value=sec%60}
+function ckAddSource(kind){const scene=getScene(state.previewScene);if(!scene)return;const e={id:makeSourceId(),type:'text',name:kind==='time'?'Clock':'Countdown',text:kind==='time'?ckTime():ckFmt(ckRemain()),clockKind:kind,color:'#ffffff',size:84,fontFamily:'Consolas, monospace',align:'center',bold:true,italic:false,backplate:true,backplateColor:'#101820',x:.3,y:.38,w:.4,h:.22,visible:true};scene.sources.push(e);state.selectedTextId=e.id;updateStatus();toast((kind==='time'?'Clock':'Countdown')+' added to Preview')}
+function ckTick(){const t=$('#ckTime');if(!t)return;
+  if(CK.cd.running&&ckRemain()<=0){CK.cd.running=false;CK.cd.remain=0;$('#ckCdStart').textContent='Start';if(CK.sound)ckBeep();toast('Countdown finished')}
+  t.textContent=ckTime();$('#ckDate').textContent=ckDate()+(CK.tz?' · '+CK.tz.replace(/_/g,' '):' · device time');
+  const r=ckRemain();$('#ckCd').textContent=ckFmt(r);$('#ckCd').classList.toggle('done',r===0&&!CK.cd.running&&CK.cd.remain===0);
+  state.scenes.forEach(s=>s.sources.forEach(e=>{if(e&&e.clockKind){e.text=e.clockKind==='time'?ckTime():ckFmt(r)}}))}
+function buildClock(){const root=$('#ckBody');if(!root||root.dataset.built)return;root.dataset.built='1';
+  const opts='<option value="">Device time (auto)</option>'+ckZones().map(z=>'<option value="'+z+'">'+z.replace(/_/g,' ')+'</option>').join('');
+  root.innerHTML='<div class="ck-tabs"><button class="btn on" data-m="clock">Clock</button><button class="btn" data-m="count">Countdown</button></div>'+
+  '<div class="ck-pane" data-p="clock"><div class="ck-big" id="ckTime">--:--:--</div><div class="ck-sub" id="ckDate"></div><label class="field"><span>Time zone</span><select id="ckTz">'+opts+'</select></label><label class="ck-check"><input type="checkbox" id="ckH24"> 24-hour format</label><button class="btn" id="ckAddClock">Add clock to Preview</button></div>'+
+  '<div class="ck-pane" data-p="count" hidden><div class="ck-big" id="ckCd">00:05:00</div><div class="ck-inputs"><label>Hours<input id="ckH" type="number" min="0" max="99" value="0"></label><label>Min<input id="ckM" type="number" min="0" max="59" value="5"></label><label>Sec<input id="ckS" type="number" min="0" max="59" value="0"></label></div><div class="ck-presets"><button class="btn" data-s="60">1 min</button><button class="btn" data-s="300">5 min</button><button class="btn" data-s="600">10 min</button><button class="btn" data-s="900">15 min</button><button class="btn" data-s="1800">30 min</button></div><div class="ck-actions"><button class="btn primary" id="ckCdStart">Start</button><button class="btn" id="ckCdReset">Reset</button></div><label class="ck-check"><input type="checkbox" id="ckSound"> Beep when it reaches zero</label><button class="btn" id="ckAddCd">Add countdown to Preview</button></div>';
+  $('#ckTz').value=CK.tz;if($('#ckTz').value!==CK.tz){CK.tz='';$('#ckTz').value=''}$('#ckH24').checked=CK.h24;$('#ckSound').checked=CK.sound;ckSetInputs(CK.cd.remain);
+  root.querySelectorAll('.ck-tabs [data-m]').forEach(b=>b.onclick=()=>{root.querySelectorAll('.ck-tabs .btn').forEach(x=>x.classList.toggle('on',x===b));root.querySelectorAll('.ck-pane').forEach(p=>p.hidden=p.dataset.p!==(b.dataset.m==='clock'?'clock':'count'))});
+  $('#ckTz').onchange=()=>{CK.tz=$('#ckTz').value;ckSave();ckTick()};$('#ckH24').onchange=()=>{CK.h24=$('#ckH24').checked;ckSave();ckTick()};$('#ckSound').onchange=()=>{CK.sound=$('#ckSound').checked;ckSave()};
+  const setCd=s=>{CK.cd.running=false;CK.cd.remain=s;CK.cdSec=s;ckSetInputs(s);$('#ckCdStart').textContent='Start';ckSave();ckTick()};
+  ['ckH','ckM','ckS'].forEach(id=>$('#'+id).onchange=()=>{if(!CK.cd.running)setCd(ckCountdownTotal())});
+  root.querySelectorAll('.ck-presets [data-s]').forEach(b=>b.onclick=()=>setCd(Number(b.dataset.s)));
+  $('#ckCdStart').onclick=()=>{if(CK.cd.running){CK.cd.remain=ckRemain();CK.cd.running=false;$('#ckCdStart').textContent='Resume'}else{if(CK.cd.remain<=0){CK.cd.remain=ckCountdownTotal()||CK.cdSec}if(CK.cd.remain<=0){toast('Choose a countdown time');return}CK.cd.endAt=performance.now()+CK.cd.remain*1000;CK.cd.running=true;$('#ckCdStart').textContent='Pause'}ckTick()};
+  $('#ckCdReset').onclick=()=>setCd(ckCountdownTotal()||CK.cdSec);
+  $('#ckAddClock').onclick=()=>ckAddSource('time');$('#ckAddCd').onclick=()=>ckAddSource('count');ckTick()}
+buildClock();setInterval(ckTick,250);
 })();

@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.2.0 (in preparation)
+## 0.3.0
+- New: Clock panel under Quick actions. A 24-hour (or 12-hour) world clock where you pick a time zone, and a countdown timer with presets, start/pause/reset and an optional beep. Both work offline and can be added to Preview as an on-screen overlay.
+
+## 0.2.0
 - Brand: the LiteStream logo (brand/litestream-logo.svg) is now the official app icon and Store art.
 - Packaging: Microsoft Store MSIX build, store listing kit and release scripts.
 - New: Support button in the header with BuyMeSoda (QR code + link).
