@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.3.0
-- New: Clock panel under Quick actions. A 24-hour (or 12-hour) world clock where you pick a time zone, and a countdown timer with presets, start/pause/reset and an optional beep. Both work offline and can be added to Preview as an on-screen overlay.
+- New: Clock panel under Quick actions. A 24-hour (or 12-hour) world clock where you pick a time zone, and a countdown timer with presets, start/pause/reset and an optional beep. Both work offline. Clock and Countdown are also in the Add source menu, with per-source time zone, text color and backplate color, and can be dragged and resized in Preview.
 
 ## 0.2.0
 - Brand: the LiteStream logo (brand/litestream-logo.svg) is now the official app icon and Store art.
