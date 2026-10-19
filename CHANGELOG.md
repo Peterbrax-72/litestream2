@@ -6,6 +6,7 @@
 ## 0.2.0
 - Fix: text overlays and clocks are now vertically centred in their box.
 - New: right-click in the Preview window to pick a source and set its fit (fit, fill, stretch, original, auto) and scale.
+- New: right-click a text or clock box in Preview for fit and position options (fit to screen, centre, lower third, reset).
 - Brand: the LiteStream logo (brand/litestream-logo.svg) is now the official app icon and Store art.
 - Packaging: Microsoft Store MSIX build, store listing kit and release scripts.
 - New: Support button in the header with BuyMeSoda (QR code + link).
