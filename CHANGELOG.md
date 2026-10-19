@@ -6,8 +6,10 @@
 ## 0.2.0
 - Fix: text overlays and clocks are now vertically centred in their box.
 - New: right-click in the Preview window to pick a source and set its fit (fit, fill, stretch, original, auto) and scale.
-- New: right-click a text or clock box in Preview for fit and position options (fit to screen, centre, lower third, reset).
+- Change: removed the right-click source-fit menu from the Preview window. Use the Source fit panel instead.
 - Change: new text overlays and clocks no longer get a backplate by default (tick Backplate to add one).
+- Fix: clocks and countdowns keep ticking on Program after a transition, like a live screen capture (they used to freeze at the moment of the transition).
+- Change: right-click in Preview does nothing when there is nothing to fit (no sources, or only text away from the text box); no more "add a source first" popup.
 - Brand: the LiteStream logo (brand/litestream-logo.svg) is now the official app icon and Store art.
 - Packaging: Microsoft Store MSIX build, store listing kit and release scripts.
 - New: Support button in the header with BuyMeSoda (QR code + link).

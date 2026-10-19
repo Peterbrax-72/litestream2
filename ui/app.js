@@ -329,7 +329,7 @@ function ckTick(){const t=$('#ckTime');if(!t)return;
   if(CK.cd.running&&ckRemain()<=0){CK.cd.running=false;CK.cd.remain=0;$('#ckCdStart').textContent='Start';if(CK.sound)ckBeep();toast('Countdown finished')}
   t.textContent=ckTime();$('#ckDate').textContent=ckDate()+(CK.tz?' · '+CK.tz.replace(/_/g,' '):' · device time');
   const r=ckRemain();$('#ckCd').textContent=ckFmt(r);$('#ckCd').classList.toggle('done',r===0&&!CK.cd.running&&CK.cd.remain===0);
-  state.scenes.forEach(s=>s.sources.forEach(e=>{if(e&&e.clockKind){e.text=e.clockKind==='time'?ckTime(e.clockTz===undefined?CK.tz:e.clockTz,e.clock24===undefined?CK.h24:e.clock24):ckFmt(r)}}))}
+  const upd=e=>{if(e&&typeof e==='object'&&e.clockKind){e.text=e.clockKind==='time'?ckTime(e.clockTz===undefined?CK.tz:e.clockTz,e.clock24===undefined?CK.h24:e.clock24):ckFmt(r)}};state.scenes.forEach(s=>s.sources.forEach(upd));[state.programSnapshot,state.fade&&state.fade.from].forEach(sn=>{if(sn&&sn.sources)sn.sources.forEach(upd)})}
 function ckAddMenu(){const opts='<option value="">Device time (auto)</option>'+ckZones().map(z=>'<option value="'+z+'"'+(z===CK.tz?' selected':'')+'>'+z.replace(/_/g,' ')+'</option>').join('');
   openModal('Add clock or countdown','Drag it in the Preview window to place it. Resize from the corner handle, and change colors later in Text formatting.',
   '<label class="field"><span>Type</span><select id="mcKind"><option value="time">Real-time clock</option><option value="count">Countdown timer</option></select></label>'+
@@ -371,10 +371,11 @@ function showPreviewMenu(e){e.preventDefault();hideCtx();const scene=getScene(st
     add('Reset size',set(clock?{x:.3,y:.38,w:.4,h:.22}:{x:.05,y:.73,w:.72,h:.2}));
     document.body.appendChild(m);const r=m.getBoundingClientRect();m.style.left=Math.max(8,Math.min(e.clientX,innerWidth-r.width-8))+'px';m.style.top=Math.max(8,Math.min(e.clientY,innerHeight-r.height-8))+'px';return}}
   const choices=scene.sources.filter(en=>transformable(en)&&sourceVisible(en)!==false);
+  if(!choices.length)return;
   const m=document.createElement('div');m.id='ctxMenu';m.className='ctx-menu';
   const head=t=>{const d=document.createElement('div');d.className='ctx-head';d.textContent=t;m.appendChild(d)};
   const add=(label,fn,on)=>{const b=document.createElement('button');b.textContent=(on?'✓ ':' ')+label;b.onclick=()=>{hideCtx();fn()};m.appendChild(b)};
-  if(!choices.length){head('Source fit');const n=document.createElement('div');n.className='ctx-head';n.style.opacity='.7';n.textContent='Add a screen, camera, image, video or slides first';m.appendChild(n)}
+  if(!choices.length){return}
   else{
     let target=null;const pt=canvasPoint(e);try{const ih=imageAtPoint(pt);if(ih&&choices.includes(ih.entry))target=ih.entry}catch(err){}
     if(!target)target=choices.find(en=>sourceKey(en)===state.selectedSource)||choices[choices.length-1];
