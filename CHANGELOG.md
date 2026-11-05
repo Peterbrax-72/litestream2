@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.0
+- New: Frames. Give a camera, screen or video a rectangle, rounded or circle frame, and lay sources out side by side, top and bottom, or as an overlay you drag to any corner of Preview. Quick layouts, size slider and colored border included. Opens automatically when you add a second capture source, or from Source fit > Frames, or by right-clicking Preview.
+
 ## 0.4.0
 - New: Modes. Pick Default (every panel, the standard look), Church (slides, scriptures, text, camera and mic, clock and timer), Influencer combo (text and all inputs, no slides, Bible or clock) or Custom (choose your own panels) from the mode button in the header.
 - New: a + button below the side panels (Add or remove panels) to show or hide panels. Your mode and custom choices are remembered.
