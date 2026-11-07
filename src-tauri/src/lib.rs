@@ -3,7 +3,9 @@ use std::process::{Child, ChildStdin, Command, Stdio};
 use std::sync::Mutex;
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::{AppHandle, Manager, PhysicalPosition, State, WebviewUrl, WebviewWindowBuilder};
+#[cfg(desktop)]
+use tauri::{AppHandle, Manager, PhysicalPosition, WebviewUrl, WebviewWindowBuilder};
+use tauri::State;
 
 struct Shared {
     ffmpeg: Mutex<Option<Child>>,
@@ -127,6 +129,7 @@ fn stop_rtmp(state: State<'_, Shared>) -> Result<(), String> {
     }
 }
 
+#[cfg(desktop)]
 fn place_projector(window: &tauri::WebviewWindow, x: Option<i32>, y: Option<i32>, fullscreen: bool) {
     let _ = window.set_fullscreen(false);
     if let (Some(x), Some(y)) = (x, y) {
@@ -138,6 +141,7 @@ fn place_projector(window: &tauri::WebviewWindow, x: Option<i32>, y: Option<i32>
     let _ = window.set_focus();
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 fn list_monitors(app: AppHandle) -> Vec<(String, i32, i32, u32, u32, bool)> {
     let primary = app.primary_monitor().ok().flatten();
@@ -155,6 +159,7 @@ fn list_monitors(app: AppHandle) -> Vec<(String, i32, i32, u32, u32, bool)> {
         .collect()
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 async fn open_projector(app: AppHandle, x: Option<i32>, y: Option<i32>, fullscreen: Option<bool>) -> Result<(), String> {
     let fs = fullscreen.unwrap_or(false);
@@ -172,11 +177,32 @@ async fn open_projector(app: AppHandle, x: Option<i32>, y: Option<i32>, fullscre
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 async fn close_projector(app: AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("projector") {
         window.close().map_err(|e| e.to_string())?;
     }
+    Ok(())
+}
+
+
+// Phones have one screen and no second window, so these are stubs on mobile.
+#[cfg(mobile)]
+#[tauri::command]
+fn list_monitors() -> Vec<(String, i32, i32, u32, u32, bool)> {
+    Vec::new()
+}
+
+#[cfg(mobile)]
+#[tauri::command]
+async fn open_projector(_x: Option<i32>, _y: Option<i32>, _fullscreen: Option<bool>) -> Result<(), String> {
+    Err("A second output window is not available on Android".into())
+}
+
+#[cfg(mobile)]
+#[tauri::command]
+async fn close_projector() -> Result<(), String> {
     Ok(())
 }
 

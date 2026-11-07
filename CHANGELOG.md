@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0
+- New: LiteStream Studio for Android. A new "Android APK" GitHub workflow builds an installable `.apk` (artifact `LiteStream-Android-APK`). Phone layout, camera and microphone inputs, text, clock, scripture and slides, and recordings saved to Downloads/LiteStream.
+- Not on Android yet: screen capture (Android's built-in web view does not support it), RTMP live streaming, and the second Program monitor window.
+- Windows: no behavior change. Tag releases now attach each platform's file to the same GitHub Release.
+
 ## 0.5.0
 - New: Frames. Give a camera, screen or video a rectangle, rounded or circle frame, and lay sources out side by side, top and bottom, or as an overlay you drag to any corner of Preview. Quick layouts, size slider and colored border included. Opens automatically when you add a second capture source, or from Source fit > Frames, or by right-clicking Preview.
 - New: edit sources in place. Double-click text in Preview (or use the ✎ icon next to a source, or right-click) to change its words, color and size without adding a new one. The ✎ icon also edits a clock's time zone or a countdown's time, and switches the camera, microphone or captured screen/window while keeping its fit and frame settings.

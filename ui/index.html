@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0d12">
 <title>LiteStream Studio</title>
 <style>
@@ -283,6 +283,12 @@ body[data-ls-mode="influencer"] #openPptxBtn,body[data-ls-mode="influencer"] #op
 .md-checks{display:grid;gap:8px;margin-top:6px;max-height:340px;overflow:auto}.md-checks label{display:flex;gap:10px;align-items:center;font-size:13px;padding:8px 10px;border:1px solid #223044;border-radius:10px;background:#0a1018}
 .fr-sec{margin:10px 0}.fr-row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.fr-row .btn{flex:1 1 auto;padding:7px 10px;font-size:12px}.fr-lab{margin-top:10px;font-size:12px;color:#a9b7c2}.fr-sel{width:100%;margin:6px 0;padding:8px;border-radius:8px;background:#0d151c;color:#e6eef3;border:1px solid #243642}.fr-opt.on{border-color:#5eead4;background:#12302f;color:#5eead4}.fr-chk{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12px;color:#a9b7c2}#frSize{width:100%}
 .edit-control{color:#5eead4}.field textarea{background:#0d151c;color:#e6eef3;border:1px solid #243642;border-radius:8px;padding:8px;font:inherit}
+
+/* Android / phones */
+html.android #quickScreen,html.android #mScreen,html.android .win-controls,html.android #tutorialsBtn span.long,html.android #openProjectorBtn,html.android #closeProjectorBtn,html.android #programProjectorBtn,html.android #outputDisplay,html.android label[for=outputDisplay]{display:none!important}
+html.android,html.android body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+html.android *{-webkit-user-select:none;user-select:none}html.android input,html.android textarea{-webkit-user-select:text;user-select:text}
+@media(max-width:720px){.transition-column{width:auto!important;justify-self:stretch!important;align-self:stretch!important;justify-content:center;flex-wrap:wrap;gap:10px}.transition-button{width:auto!important;min-width:120px;height:42px!important;padding:0 14px!important;flex-direction:row!important;gap:8px}.transition-button svg{width:18px;height:18px}.top-center{display:none!important}.brand-name{font-size:15px}.toolbar-actions{flex:1 1 100%;margin-left:0!important;justify-content:space-between}.toolbar-actions .btn{flex:1 1 auto;padding:7px 6px!important}.toolbar-actions #recordBtn{flex:1 1 100%}.dual-preview{grid-template-columns:1fr!important;gap:8px!important}.transition-column{flex-direction:row!important;order:2}.transition-button svg{transform:rotate(90deg)}.preview-feed{order:1}.program-feed{order:3}html,body{height:auto!important;overflow:auto!important}.app{height:auto!important;min-height:100vh!important;display:block!important;padding:0 10px 18px!important}.workspace{overflow:visible!important;flex:none!important}.main-col,.side{overflow:visible!important;height:auto!important;max-height:none!important}.dual-preview .preview-stage{max-height:none!important}.topbar{height:auto!important;position:static!important;min-height:48px;flex-wrap:wrap;gap:6px;padding:6px 10px}.top-center{display:none}.toolbar-actions{flex-wrap:wrap;gap:6px;margin-left:auto}.toolbar-actions .btn{padding:7px 9px;font-size:12px}.tutorials-btn,.support-btn{font-size:0!important}.tutorials-btn::before{content:"\25B6";font-size:12px}.support-btn .heart{font-size:13px}.workspace{display:block!important;height:auto!important;overflow:visible}.main-col,.side{width:auto!important;max-width:none!important;min-width:0!important}.side{margin-top:10px}.btn,.mini-control,.mode-btn{min-height:36px}.mini-control{width:34px;height:34px;font-size:15px}.modal{max-width:94vw!important;max-height:90vh;overflow:auto}.ctx-menu{min-width:220px!important;max-width:92vw}}
 </style>
 </head>
 <body>

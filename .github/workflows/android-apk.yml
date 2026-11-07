@@ -1,0 +1,116 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+    paths:
+      - 'ui/**'
+      - 'src-tauri/**'
+      - 'package.json'
+      - 'store/android/**'
+      - '.github/workflows/android-apk.yml'
+
+permissions:
+  contents: write
+
+env:
+  # Optional release signing. Leave these unset and the APK is signed with a
+  # throwaway key (fine for sideloading; use real secrets for updates/Play).
+  KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+  KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+  KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+
+jobs:
+  build-apk:
+    name: LiteStream Studio APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install Rust with Android targets
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Point at the Android NDK
+        run: |
+          echo "NDK_HOME=${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_HOME}" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+
+      - name: Install Node dependencies
+        run: npm install --include=dev
+
+      - name: Make Android launcher icons from the LiteStream logo
+        run: npx tauri icon src-tauri/icons/icon.png
+
+      - name: Create the Android project
+        run: npx tauri android init --ci
+
+      - name: Add permissions and the LiteStream native bridge
+        run: python3 store/android/patch-android.py
+
+      - name: Build the APK (64-bit and 32-bit phones)
+        run: npx tauri android build --apk --target aarch64 --target armv7 --ci
+
+      - name: Sign the APK
+        run: |
+          set -euo pipefail
+          APK=$(find src-tauri/gen/android/app/build/outputs/apk -name '*unsigned*.apk' | head -n1)
+          if [ -z "$APK" ]; then APK=$(find src-tauri/gen/android/app/build/outputs/apk -name '*.apk' | head -n1); fi
+          echo "Built: $APK"
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n1)
+          VERSION=$(node -p "require('./package.json').version")
+          OUT="LiteStream-Studio-Android-${VERSION}.apk"
+          if [ -n "${KEYSTORE_B64:-}" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > release.jks
+            STORE_PASS="$KEYSTORE_PASSWORD"; ALIAS="$KEY_ALIAS"
+            echo "Signing with your release key"
+          else
+            STORE_PASS="litestream-test"; ALIAS="litestream"
+            keytool -genkeypair -keystore release.jks -storepass "$STORE_PASS" -keypass "$STORE_PASS" \
+              -alias "$ALIAS" -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=LiteStream Studio"
+            echo "No release key set: signing with a throwaway key"
+          fi
+          "$BT/zipalign" -f -p 4 "$APK" aligned.apk
+          "$BT/apksigner" sign --ks release.jks --ks-pass "pass:$STORE_PASS" --key-pass "pass:$STORE_PASS" \
+            --ks-key-alias "$ALIAS" --out "$OUT" aligned.apk
+          "$BT/apksigner" verify --print-certs "$OUT" | head -n 3
+          ls -lh "$OUT"
+          echo "APK_FILE=$OUT" >> "$GITHUB_ENV"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LiteStream-Android-APK
+          path: ${{ env.APK_FILE }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach APK to the GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${{ github.ref_name }}" >/dev/null 2>&1 || \
+            gh release create "${{ github.ref_name }}" --title "LiteStream ${{ github.ref_name }}" --notes "LiteStream releases."
+          gh release upload "${{ github.ref_name }}" "$APK_FILE" --clobber
