@@ -4,6 +4,7 @@
 - New: LiteStream Studio for Android. A new "Android APK" GitHub workflow builds an installable `.apk` (artifact `LiteStream-Android-APK`). Phone layout, camera and microphone inputs, text, clock, scripture and slides, and recordings saved to Downloads/LiteStream.
 - Not on Android yet: screen capture (Android's built-in web view does not support it), RTMP live streaming, and the second Program monitor window.
 - Phone landscape layout: Preview and Program side by side with a compact Transition button.
+- Recordings are now saved as MP4 (H.264 + AAC) wherever the device supports it, at 6 Mbps for 720p and 10 Mbps for 1080p, so they play on phones, TVs and PCs. WebM is only a fallback.
 - Windows: no behavior change. Tag releases now attach each platform's file to the same GitHub Release.
 
 ## 0.5.0
