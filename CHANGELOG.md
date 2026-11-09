@@ -2,6 +2,7 @@
 
 ## 0.7.0
 - New: wireless remote control. On the PC, open Remote and turn it on to get an address and a 6-digit PIN. On your phone, tap Remote in the Android app (or open the address in any phone browser on the same Wi-Fi) to see live Preview and Program and control Transition, Fade/Cut/RT, Recording, Microphone, scenes, source visibility, slides and scripture, the countdown, and text.
+- New: pair by QR code. The PC shows a QR code; the Android app has Remote > Scan QR (or use any phone camera). The PC lists every network address so you can pick the right one, and it works with no internet: same Wi-Fi with no uplink, or the phone joined to the PC's Mobile Hotspot. On Android the app binds to Wi-Fi so a no-internet Wi-Fi is not skipped for mobile data.
 - Safe by default: off until you turn it on, PIN required, wrong-PIN lockout, and a new PIN signs every phone out.
 
 ## 0.6.0

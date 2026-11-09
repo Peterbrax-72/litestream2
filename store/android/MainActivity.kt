@@ -1,6 +1,9 @@
 package __PACKAGE__
 
 import android.content.ContentValues
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -23,6 +26,11 @@ class MainActivity : TauriActivity() {
     super.onCreate(savedInstanceState)
     // Keep the screen on while the studio is open (recording and presenting).
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    // Start every launch on the normal default network (remote control may bind to Wi-Fi later).
+    try {
+      (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).bindProcessToNetwork(null)
+    } catch (e: Exception) {
+    }
     // Keep the UI clear of the status bar, navigation bar and camera cut-out.
     val root = findViewById<View>(android.R.id.content)
     ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
@@ -118,6 +126,26 @@ class LiteBridge(private val activity: MainActivity) {
     pendingFile?.delete()
     pendingUri = null
     pendingFile = null
+  }
+
+  /**
+   * A Wi-Fi network with no internet is often ignored in favour of mobile data, which cannot
+   * reach the PC. Bind this app to the Wi-Fi network so remote control works with no internet.
+   */
+  @JavascriptInterface
+  fun useWifi(): Boolean {
+    return try {
+      val cm = activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+      for (n in cm.allNetworks) {
+        val caps = cm.getNetworkCapabilities(n) ?: continue
+        if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+          return cm.bindProcessToNetwork(n)
+        }
+      }
+      false
+    } catch (e: Exception) {
+      false
+    }
   }
 
   @JavascriptInterface

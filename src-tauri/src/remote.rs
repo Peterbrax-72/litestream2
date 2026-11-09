@@ -84,6 +84,118 @@ pub fn local_ip() -> String {
     "127.0.0.1".to_string()
 }
 
+
+/// Every IPv4 address this PC has on a network, best first. Works with no internet,
+/// for example on a router with no uplink, a phone hotspot, or this PC's own Mobile Hotspot.
+pub fn local_ips() -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    let routed = local_ip();
+    if !routed.starts_with("127.") {
+        out.push(routed);
+    }
+    for ip in interface_ips() {
+        if !out.contains(&ip) {
+            out.push(ip);
+        }
+    }
+    if out.is_empty() {
+        out.push("127.0.0.1".to_string());
+    }
+    out
+}
+
+fn interface_ips() -> Vec<String> {
+    let text = interface_text();
+    let mut ips = parse_ips(&text);
+    // private LAN ranges first, link-local (169.254.x.x) last
+    ips.sort_by_key(|ip| if ip.starts_with("169.254.") { 2 } else if is_private(ip) { 0 } else { 1 });
+    ips
+}
+
+fn is_private(ip: &str) -> bool {
+    match ip.parse::<std::net::Ipv4Addr>() {
+        Ok(a) => a.is_private(),
+        Err(_) => false,
+    }
+}
+
+/// Pull usable IPv4 addresses out of `ipconfig` / `ip addr` / `hostname -I` output.
+fn parse_ips(text: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for line in text.lines() {
+        let lower = line.to_ascii_lowercase();
+        let wanted = lower.contains("ipv4") || lower.contains("inet ") || !line.contains(':') && !lower.contains("mask") && !lower.contains("gateway");
+        if !wanted || lower.contains("mask") || lower.contains("gateway") || lower.contains("dhcp") || lower.contains("dns") {
+            continue;
+        }
+        for token in line.split(|c: char| c.is_whitespace() || c == ':' || c == '(' || c == ')' || c == '/') {
+            if let Ok(a) = token.parse::<std::net::Ipv4Addr>() {
+                if !a.is_loopback() && !a.is_unspecified() && !a.is_broadcast() {
+                    let s = a.to_string();
+                    if !out.contains(&s) {
+                        out.push(s);
+                    }
+                }
+                break;
+            }
+        }
+    }
+    out
+}
+
+#[allow(unused_mut)]
+fn interface_text() -> String {
+    use std::process::{Command, Stdio};
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        let mut c = Command::new("ipconfig");
+        c.creation_flags(0x08000000).stdout(Stdio::piped()).stderr(Stdio::null());
+        if let Ok(o) = c.output() {
+            return String::from_utf8_lossy(&o.stdout).to_string();
+        }
+        String::new()
+    }
+    #[cfg(not(windows))]
+    {
+        for (prog, args) in [("hostname", vec!["-I"]), ("ip", vec!["-4", "-o", "addr"])] {
+            if let Ok(o) = Command::new(prog).args(&args).stdout(Stdio::piped()).stderr(Stdio::null()).output() {
+                if o.status.success() && !o.stdout.is_empty() {
+                    return String::from_utf8_lossy(&o.stdout).to_string();
+                }
+            }
+        }
+        String::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_windows_ipconfig() {
+        let t = "Wireless LAN adapter Wi-Fi:
+   Connection-specific DNS Suffix  . :
+   IPv4 Address. . . . . . . . . . . : 192.168.43.17(Preferred)
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.43.1
+Ethernet adapter vEthernet (WSL):
+   Autoconfiguration IPv4 Address. . : 169.254.12.9(Preferred)
+   Adresse IPv4. . . . . . . . . . . : 172.20.80.1
+";
+        assert_eq!(parse_ips(t), vec!["192.168.43.17", "169.254.12.9", "172.20.80.1"]);
+    }
+
+    #[test]
+    fn parses_linux_outputs() {
+        assert_eq!(parse_ips("192.168.1.5 10.0.0.2 
+"), vec!["192.168.1.5"]);
+        assert_eq!(parse_ips("2: wlan0    inet 192.168.1.5/24 brd 192.168.1.255 scope global wlan0
+"), vec!["192.168.1.5"]);
+    }
+}
+
 impl Remote {
     /// Start listening. Returns the port actually used. `page` is the HTML served at `/`.
     pub fn start(&self, pin: String, port: u16, page: &'static str) -> Result<u16, String> {

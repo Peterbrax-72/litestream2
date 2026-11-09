@@ -262,6 +262,12 @@ fn remote_start(pin: String, port: u16, remote: State<'_, remote::Remote>) -> Re
 
 #[cfg(desktop)]
 #[tauri::command]
+fn remote_ips() -> Vec<String> {
+    remote::local_ips()
+}
+
+#[cfg(desktop)]
+#[tauri::command]
 fn remote_stop(remote: State<'_, remote::Remote>) {
     remote.stop();
 }
@@ -301,6 +307,12 @@ fn remote_start(_pin: String, _port: u16) -> Result<(String, u16), String> {
 
 #[cfg(mobile)]
 #[tauri::command]
+fn remote_ips() -> Vec<String> {
+    Vec::new()
+}
+
+#[cfg(mobile)]
+#[tauri::command]
 fn remote_stop() {}
 
 #[cfg(mobile)]
@@ -325,7 +337,7 @@ pub fn run() {
     #[cfg(desktop)]
     let builder = builder.manage(remote::Remote::default());
     builder
-        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector, list_monitors, open_url, http_get, remote_start, remote_stop, remote_poll, remote_push_state, remote_push_frame])
+        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector, list_monitors, open_url, http_get, remote_start, remote_ips, remote_stop, remote_poll, remote_push_state, remote_push_frame])
         .run(tauri::generate_context!())
         .expect("error while running LiteStream");
 }

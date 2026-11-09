@@ -86,3 +86,5 @@ Open **Remote** in the PC app and switch on *Allow phone control on this Wi-Fi*.
 On the phone, tap **Remote** in the Android app and enter them, or open the address in any phone browser on the same Wi-Fi.
 The PC app runs a small server (`src-tauri/src/remote.rs`) and serves `ui/remote.html`. Windows may ask to allow LiteStream on private networks: choose Allow.
 Use it only on a Wi-Fi you trust and turn it off when you are done.
+
+**QR pairing and offline use:** the Remote window shows a QR code with the address and PIN. In the Android app tap Remote > Scan QR, or scan it with any phone camera. Nothing needs the internet: use the same Wi-Fi (even if the router has no internet), or turn on the PC's Mobile Hotspot and join it from the phone. If a PC has several networks, pick the right one under Network in the Remote window.
