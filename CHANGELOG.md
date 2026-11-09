@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0
+- New: wireless remote control. On the PC, open Remote and turn it on to get an address and a 6-digit PIN. On your phone, tap Remote in the Android app (or open the address in any phone browser on the same Wi-Fi) to see live Preview and Program and control Transition, Fade/Cut/RT, Recording, Microphone, scenes, source visibility, slides and scripture, the countdown, and text.
+- Safe by default: off until you turn it on, PIN required, wrong-PIN lockout, and a new PIN signs every phone out.
+
 ## 0.6.0
 - New: LiteStream Studio for Android. A new "Android APK" GitHub workflow builds an installable `.apk` (artifact `LiteStream-Android-APK`). Phone layout, camera and microphone inputs, text, clock, scripture and slides, and recordings saved to Downloads/LiteStream.
 - Not on Android yet: screen capture (Android's built-in web view does not support it), RTMP live streaming, and the second Program monitor window.

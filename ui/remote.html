@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0a1017">
+<title>LiteStream Remote</title>
+<style>
+:root{--bg:#0a1017;--card:#111b26;--line:#243642;--tx:#e6eef3;--mut:#8fa3b0;--ac:#5eead4;--red:#ff5d73;--vio:#7c7bff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);min-height:100vh}
+button{font:inherit;color:inherit;border:1px solid var(--line);background:#16222e;border-radius:12px;padding:12px 14px;min-height:46px;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.97)}
+button.on{border-color:var(--ac);color:var(--ac);background:#0f2a2c}
+button.danger{background:#3a1520;border-color:var(--red);color:#ffd3da}
+button[disabled]{opacity:.45}
+input{font:inherit;color:var(--tx);background:#0d151c;border:1px solid var(--line);border-radius:10px;padding:12px;width:100%}
+.bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#0a1017ee;backdrop-filter:blur(10px);z-index:5}
+.bar b{font-size:16px;letter-spacing:.2px}.grow{flex:1}
+.dot{width:10px;height:10px;border-radius:50%;background:#556}.dot.ok{background:var(--ac)}.dot.rec{background:var(--red);animation:p 1s infinite}
+@keyframes p{50%{opacity:.35}}
+.pill{font-size:12px;color:var(--mut)}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 14px 40px}
+.login{max-width:380px;margin:12vh auto 0;padding:0 18px;text-align:center}
+.login h1{margin:8px 0 4px;font-size:24px}.login p{color:var(--mut);margin:0 0 18px}
+.login input{text-align:center;font-size:26px;letter-spacing:8px}
+.err{color:var(--red);min-height:22px;margin:10px 0}
+.screens{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.scr{position:relative;background:#000;border:1px solid var(--line);border-radius:14px;overflow:hidden;aspect-ratio:16/9}
+.scr img{width:100%;height:100%;object-fit:contain;display:block}
+.tag{position:absolute;left:8px;top:8px;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:3px 8px;border-radius:999px;background:#000a}
+.tag.pg{color:var(--red)}.tag.pv{color:var(--ac)}
+.empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--mut);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.row>*{flex:1 1 120px}
+.take{background:linear-gradient(135deg,#5eead4,#7c7bff);color:#06121a;font-weight:800;letter-spacing:1px;border:0;min-height:60px;font-size:17px;flex:2 1 220px}
+.chips{display:flex;gap:6px;flex:1 1 180px}.chips button{flex:1;padding:10px 4px}
+h3{margin:18px 0 8px;font-size:12px;letter-spacing:1.6px;color:var(--mut);text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tile{display:flex;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:left}
+.tile.pv{border-color:var(--ac)}.tile.pg{border-color:var(--red)}
+.tile .n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .b{display:flex;gap:6px;font-size:10px;letter-spacing:1px;min-height:14px}.tile .b i{font-style:normal;padding:1px 6px;border-radius:99px;background:#000a}
+.tile .live{padding:6px;min-height:34px;font-size:13px}
+.list{display:flex;flex-direction:column;gap:6px}
+.src{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.src span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.src button{min-height:38px;padding:6px 12px}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px}.big button{min-height:76px;font-size:18px;font-weight:700}
+.txt{display:flex;gap:8px;margin-bottom:8px}.txt input{flex:1}.txt button{flex:0 0 auto}
+.cd{font-size:34px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;margin-bottom:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.hide{display:none!important}
+@media(max-width:640px){.screens{grid-template-columns:1fr}}
+@media(orientation:landscape) and (max-height:520px){.login{margin-top:2vh}.screens{grid-template-columns:2fr 1fr}.take{min-height:48px}}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+  <svg width="56" height="56" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#7c7bff"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><path d="M22 16l24 16-24 16z" fill="#fff"/></svg>
+  <h1>LiteStream Remote</h1>
+  <p>Enter the PIN shown on your PC</p>
+  <input id="pin" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="••••••" aria-label="PIN">
+  <div class="err" id="err"></div>
+  <button id="go" class="take" style="width:100%">Connect</button>
+</div>
+
+<div id="app" class="hide">
+  <div class="bar">
+    <span class="dot" id="dot"></span><b>LiteStream Remote</b><span class="pill" id="conn">Connecting…</span>
+    <span class="grow"></span><span class="pill" id="timer"></span>
+    <button id="exit" style="min-height:36px;padding:6px 12px">Exit</button>
+  </div>
+  <div class="wrap">
+    <div class="screens">
+      <div class="scr"><img id="imgPg" alt="Program"><div class="empty" id="emptyPg">Waiting for the PC…</div><span class="tag pg">● PROGRAM</span></div>
+      <div class="scr"><img id="imgPv" alt="Preview"><div class="empty" id="emptyPv"></div><span class="tag pv">PREVIEW</span></div>
+    </div>
+    <div class="row">
+      <button class="take" id="take">TAKE ▸ PROGRAM</button>
+      <div class="chips" id="chips"><button data-s="fade">Fade</button><button data-s="cut">Cut</button><button data-s="rt">RT</button></div>
+    </div>
+    <div class="row">
+      <button id="rec">● Start Recording</button>
+      <button id="mic">🎙 Microphone</button>
+    </div>
+
+    <div id="deckBox" class="hide"><h3 id="deckTitle">Slides</h3><div class="big"><button id="prev">◂ Previous</button><button id="next">Next ▸</button></div></div>
+    <div id="cdBox" class="hide"><h3>Countdown</h3><div class="card"><div class="cd" id="cd">00:00</div><div class="row" style="margin-top:0"><button id="cdGo">Start</button><button id="cdReset">Reset</button></div></div></div>
+
+    <h3>Scenes</h3><div class="grid" id="scenes"></div>
+    <h3>Sources in Preview</h3><div class="list" id="sources"></div>
+    <div id="textBox" class="hide"><h3>Text</h3><div id="texts"></div></div>
+  </div>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+let ws=null,authed=false,state=null,retry=0,pingT=0,urlPg=null,urlPv=null,wake=null,wantOpen=false,sentPin='';
+const params=new URLSearchParams(location.search);
+try{const saved=localStorage.getItem('ls-remote-pin');if(saved)$('#pin').value=saved}catch(e){}
+if(params.get('pin'))$('#pin').value=params.get('pin');
+function send(o){if(ws&&ws.readyState===1&&authed)ws.send(JSON.stringify(o))}
+function setConn(t,cls){$('#conn').textContent=t;$('#dot').className='dot '+(cls||'')}
+function connect(pin){
+  wantOpen=true;sentPin=pin;
+  try{ws&&ws.close()}catch(e){}
+  authed=false;setConn('Connecting…');
+  ws=new WebSocket('ws://'+location.host+'/');
+  ws.binaryType='blob';
+  ws.onopen=()=>ws.send('pin:'+pin);
+  ws.onmessage=ev=>{
+    if(typeof ev.data!=='string'){frame(ev.data);return}
+    const m=ev.data;
+    if(m==='ok'){authed=true;retry=0;$('#login').classList.add('hide');$('#app').classList.remove('hide');setConn('Connected','ok');try{localStorage.setItem('ls-remote-pin',pin)}catch(e){}keepAwake();clearInterval(pingT);pingT=setInterval(()=>{try{ws.send('ping')}catch(e){}},8000)}
+    else if(m.startsWith('err:')){wantOpen=false;const e=m.slice(4);$('#err').textContent=e==='badpin'?'Wrong PIN. Check the number on your PC.':e==='locked'?'Too many wrong tries. Wait a minute.':e==='full'?'Too many phones are connected.':'Could not connect.';$('#login').classList.remove('hide');$('#app').classList.add('hide');try{localStorage.removeItem('ls-remote-pin')}catch(e2){}}
+    else if(m.startsWith('state:')){try{state=JSON.parse(m.slice(6));render()}catch(e){}}
+  };
+  ws.onclose=()=>{clearInterval(pingT);if(authed){authed=false;setConn('Reconnecting…','')}if(wantOpen){retry=Math.min(retry+1,6);setTimeout(()=>{if(wantOpen)connect(sentPin)},Math.min(400*retry*retry,6000))}};
+  ws.onerror=()=>{if(!authed)$('#err').textContent='Cannot reach the PC. Is the app open with Remote turned on, on the same Wi-Fi?'};
+}
+function frame(blob){blob.arrayBuffer().then(buf=>{const u=new Uint8Array(buf);if(u.length<2)return;const kind=u[0],url=URL.createObjectURL(new Blob([u.subarray(1)],{type:'image/jpeg'}));if(kind===1){const old=urlPg;urlPg=url;$('#imgPg').src=url;$('#emptyPg').classList.add('hide');if(old)setTimeout(()=>URL.revokeObjectURL(old),500)}else{const old=urlPv;urlPv=url;$('#imgPv').src=url;$('#emptyPv').classList.add('hide');if(old)setTimeout(()=>URL.revokeObjectURL(old),500)}})}
+async function keepAwake(){try{if(navigator.wakeLock&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null})}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){keepAwake();if(wantOpen&&(!ws||ws.readyState>1))connect(sentPin)}});
+function fmt(s){s=Math.max(0,Math.floor(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,p=n=>String(n).padStart(2,'0');return (h?h+':':'')+p(m)+':'+p(x)}
+function render(){
+  const s=state;if(!s)return;
+  $('#dot').className='dot '+(s.rec?'rec':'ok');
+  $('#timer').textContent=s.rec?'● '+fmt(s.recSecs||0):'';
+  const rec=$('#rec');rec.textContent=s.rec?'■ Stop Recording':'● Start Recording';rec.classList.toggle('danger',!!s.rec);
+  const mic=$('#mic');mic.textContent=s.mic==='on'?'🎙 Mic on':s.mic==='muted'?'🔇 Mic muted':'🎙 Turn mic on';mic.classList.toggle('on',s.mic==='on');
+  document.querySelectorAll('#chips button').forEach(b=>b.classList.toggle('on',b.dataset.s===s.style));
+  $('#take').disabled=s.style==='rt';
+  // scenes
+  const sc=$('#scenes');sc.textContent='';
+  (s.scenes||[]).forEach(x=>{const t=document.createElement('div');t.className='tile'+(x.id===s.preview?' pv':'')+(x.id===s.program?' pg':'');const n=document.createElement('div');n.className='n';n.textContent=x.name;const b=document.createElement('div');b.className='b';if(x.id===s.preview){const i=document.createElement('i');i.style.color='#5eead4';i.textContent='PREVIEW';b.appendChild(i)}if(x.id===s.program){const i=document.createElement('i');i.style.color='#ff5d73';i.textContent='PROGRAM';b.appendChild(i)}const bt=document.createElement('button');bt.className='live';bt.textContent='▶ Go live';bt.onclick=e=>{e.stopPropagation();send({c:'take_scene',id:x.id})};t.append(n,b,bt);t.onclick=()=>send({c:'scene',id:x.id});sc.appendChild(t)});
+  // sources
+  const sl=$('#sources');sl.textContent='';
+  if(!(s.sources||[]).length){const e=document.createElement('div');e.className='pill';e.textContent='No sources in this scene yet.';sl.appendChild(e)}
+  (s.sources||[]).forEach(x=>{const r=document.createElement('div');r.className='src';const n=document.createElement('span');n.textContent=x.name+' · '+x.type;const b=document.createElement('button');b.textContent=x.visible?'Shown':'Hidden';b.classList.toggle('on',!!x.visible);b.onclick=()=>send({c:'source',key:x.key});r.append(n,b);sl.appendChild(r)});
+  // deck
+  const d=s.deck;$('#deckBox').classList.toggle('hide',!d);if(d){$('#deckTitle').textContent=(d.label||'Slides')+(d.total?' · '+(d.index+1)+' / '+d.total:'')}
+  // countdown
+  const cd=s.cd;$('#cdBox').classList.toggle('hide',!cd);if(cd){$('#cd').textContent=fmt(cd.remain);$('#cdGo').textContent=cd.running?'Pause':(cd.remain>0&&cd.started?'Resume':'Start')}
+  // texts
+  const tb=$('#texts');const active=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#texts');
+  $('#textBox').classList.toggle('hide',!(s.texts||[]).length);
+  if(!active){tb.textContent='';(s.texts||[]).forEach(x=>{const r=document.createElement('div');r.className='txt';const i=document.createElement('input');i.value=x.text;i.maxLength=300;i.setAttribute('aria-label',x.name||'Text');const b=document.createElement('button');b.textContent='Update';const go=()=>{send({c:'text',id:x.id,text:i.value});b.textContent='Sent ✓';setTimeout(()=>b.textContent='Update',900);i.blur()};b.onclick=go;i.onkeydown=e=>{if(e.key==='Enter')go()};r.append(i,b);tb.appendChild(r)})}
+}
+$('#take').onclick=()=>send({c:'take'});
+$('#rec').onclick=()=>send({c:'record'});
+$('#mic').onclick=()=>send({c:'mic'});
+$('#prev').onclick=()=>send({c:'slide',d:-1});
+$('#next').onclick=()=>send({c:'slide',d:1});
+$('#cdGo').onclick=()=>send({c:'cd',a:'toggle'});
+$('#cdReset').onclick=()=>send({c:'cd',a:'reset'});
+document.querySelectorAll('#chips button').forEach(b=>b.onclick=()=>send({c:'style',s:b.dataset.s}));
+$('#imgPv').onclick=()=>send({c:'take'});
+function go(){const pin=$('#pin').value.trim();if(pin.length<4){$('#err').textContent='Enter the PIN from your PC.';return}$('#err').textContent='';connect(pin)}
+$('#go').onclick=go;$('#pin').onkeydown=e=>{if(e.key==='Enter')go()};
+$('#exit').onclick=()=>{wantOpen=false;try{ws.close()}catch(e){}if(history.length>1)history.back();else{$('#app').classList.add('hide');$('#login').classList.remove('hide')}};
+if(params.get('pin')||$('#pin').value.length>=4)go();
+})();
+</script>
+</body>
+</html>

@@ -78,3 +78,11 @@ from the same `ui/` code using Tauri 2 mobile. Run it from the Actions tab, or p
   Create a key with `keytool -genkeypair -v -keystore litestream.jks -alias litestream -keyalg RSA -keysize 2048 -validity 10000` and base64 it with `base64 -w0 litestream.jks`.
 - Native bits live in `store/android/` (MainActivity bridge for saving recordings and opening links) and are applied after `tauri android init` by `store/android/patch-android.py`.
 - Not available on Android: screen capture, RTMP streaming (needs FFmpeg) and the second Program window.
+
+
+## Wireless remote control
+
+Open **Remote** in the PC app and switch on *Allow phone control on this Wi-Fi*. It shows an address such as `http://192.168.1.5:8765` and a PIN.
+On the phone, tap **Remote** in the Android app and enter them, or open the address in any phone browser on the same Wi-Fi.
+The PC app runs a small server (`src-tauri/src/remote.rs`) and serves `ui/remote.html`. Windows may ask to allow LiteStream on private networks: choose Allow.
+Use it only on a Wi-Fi you trust and turn it off when you are done.

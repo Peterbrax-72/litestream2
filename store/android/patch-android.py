@@ -23,6 +23,9 @@ wanted = [
 add = "\n    ".join(w for w in wanted if w.split('"')[1] not in text)
 if add:
     text = text.replace("<application", add + "\n\n    <application", 1)
+# Remote control talks to the PC at http://192.168.x.x, which Android blocks by default.
+if "usesCleartextTraffic" not in text:
+    text = text.replace("<application", '<application android:usesCleartextTraffic="true"', 1)
 manifest.write_text(text, encoding="utf-8")
 
 kt = next(root.rglob("MainActivity.kt"), None)

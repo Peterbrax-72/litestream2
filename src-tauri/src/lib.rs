@@ -7,6 +7,9 @@ use std::time::{Duration, Instant};
 use tauri::{AppHandle, Manager, PhysicalPosition, WebviewUrl, WebviewWindowBuilder};
 use tauri::State;
 
+#[cfg(desktop)]
+mod remote;
+
 struct Shared {
     ffmpeg: Mutex<Option<Child>>,
 }
@@ -249,11 +252,80 @@ async fn http_get(url: String) -> Result<String, String> {
     Ok(String::from_utf8_lossy(&out.stdout).to_string())
 }
 
+
+#[cfg(desktop)]
+#[tauri::command]
+fn remote_start(pin: String, port: u16, remote: State<'_, remote::Remote>) -> Result<(String, u16), String> {
+    let used = remote.start(pin, port, include_str!("../../ui/remote.html"))?;
+    Ok((remote::local_ip(), used))
+}
+
+#[cfg(desktop)]
+#[tauri::command]
+fn remote_stop(remote: State<'_, remote::Remote>) {
+    remote.stop();
+}
+
+#[cfg(desktop)]
+#[tauri::command]
+fn remote_poll(remote: State<'_, remote::Remote>) -> (usize, Vec<String>) {
+    let (_, clients) = remote.status();
+    (clients, remote.poll())
+}
+
+#[cfg(desktop)]
+#[tauri::command]
+fn remote_push_state(json: String, remote: State<'_, remote::Remote>) {
+    if json.len() <= 200_000 {
+        remote.push_state(json);
+    }
+}
+
+#[cfg(desktop)]
+#[tauri::command]
+fn remote_push_frame(kind: u8, data: String, remote: State<'_, remote::Remote>) -> Result<(), String> {
+    if data.len() > 3_000_000 {
+        return Err("frame too large".into());
+    }
+    let bytes = decode_base64(&data)?;
+    remote.push_frame(kind, bytes);
+    Ok(())
+}
+
+// Phones control a PC; they do not host. These keep the same command names on mobile.
+#[cfg(mobile)]
+#[tauri::command]
+fn remote_start(_pin: String, _port: u16) -> Result<(String, u16), String> {
+    Err("Hosting remote control is only available in the PC app".into())
+}
+
+#[cfg(mobile)]
+#[tauri::command]
+fn remote_stop() {}
+
+#[cfg(mobile)]
+#[tauri::command]
+fn remote_poll() -> (usize, Vec<String>) {
+    (0, Vec::new())
+}
+
+#[cfg(mobile)]
+#[tauri::command]
+fn remote_push_state(_json: String) {}
+
+#[cfg(mobile)]
+#[tauri::command]
+fn remote_push_frame(_kind: u8, _data: String) -> Result<(), String> {
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .manage(Shared { ffmpeg: Mutex::new(None) })
-        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector, list_monitors, open_url, http_get])
+    let builder = tauri::Builder::default().manage(Shared { ffmpeg: Mutex::new(None) });
+    #[cfg(desktop)]
+    let builder = builder.manage(remote::Remote::default());
+    builder
+        .invoke_handler(tauri::generate_handler![start_rtmp, write_rtmp_chunk, stop_rtmp, open_projector, close_projector, list_monitors, open_url, http_get, remote_start, remote_stop, remote_poll, remote_push_state, remote_push_frame])
         .run(tauri::generate_context!())
         .expect("error while running LiteStream");
 }
