@@ -88,3 +88,5 @@ The PC app runs a small server (`src-tauri/src/remote.rs`) and serves `ui/remote
 Use it only on a Wi-Fi you trust and turn it off when you are done.
 
 **QR pairing and offline use:** the Remote window shows a QR code with the address and PIN. In the Android app tap Remote > Scan QR, or scan it with any phone camera. Nothing needs the internet: use the same Wi-Fi (even if the router has no internet), or turn on the PC's Mobile Hotspot and join it from the phone. If a PC has several networks, pick the right one under Network in the Remote window.
+
+**Getting the phone app:** in the Remote window open "Phone does not have the app yet?" and scan the QR code (or use Open download page). It links to the latest GitHub Release, so the repository (or at least its Releases) must be public for other people to download it. Push a `v*` tag to publish an APK there.

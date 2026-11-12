@@ -96,13 +96,16 @@ jobs:
             --ks-key-alias "$ALIAS" --out "$OUT" aligned.apk
           "$BT/apksigner" verify --print-certs "$OUT" | head -n 3
           ls -lh "$OUT"
+          cp "$OUT" LiteStream-Studio-Android.apk
           echo "APK_FILE=$OUT" >> "$GITHUB_ENV"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: LiteStream-Android-APK
-          path: ${{ env.APK_FILE }}
+          path: |
+            ${{ env.APK_FILE }}
+            LiteStream-Studio-Android.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -113,4 +116,4 @@ jobs:
         run: |
           gh release view "${{ github.ref_name }}" >/dev/null 2>&1 || \
             gh release create "${{ github.ref_name }}" --title "LiteStream ${{ github.ref_name }}" --notes "LiteStream releases."
-          gh release upload "${{ github.ref_name }}" "$APK_FILE" --clobber
+          gh release upload "${{ github.ref_name }}" "$APK_FILE" LiteStream-Studio-Android.apk --clobber
