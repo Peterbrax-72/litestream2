@@ -2,6 +2,11 @@ name: Android APK
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Optional: publish the APK to this release tag (for example v0.7.0). Creates the release if it does not exist.'
+        required: false
+        default: ''
   push:
     branches: [main, master]
     tags: ['v*']
@@ -109,11 +114,12 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Attach APK to the GitHub Release (tags only)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Attach APK to the GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.release_tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.event.inputs.release_tag }}
         run: |
-          gh release view "${{ github.ref_name }}" >/dev/null 2>&1 || \
-            gh release create "${{ github.ref_name }}" --title "LiteStream ${{ github.ref_name }}" --notes "LiteStream releases."
-          gh release upload "${{ github.ref_name }}" "$APK_FILE" LiteStream-Studio-Android.apk --clobber
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "LiteStream $TAG" --notes "LiteStream releases."
+          gh release upload "$TAG" "$APK_FILE" LiteStream-Studio-Android.apk --clobber

@@ -3,7 +3,7 @@
 ## 0.7.0
 - New: wireless remote control. On the PC, open Remote and turn it on to get an address and a 6-digit PIN. On your phone, tap Remote in the Android app (or open the address in any phone browser on the same Wi-Fi) to see live Preview and Program and control Transition, Fade/Cut/RT, Recording, Microphone, scenes, source visibility, slides and scripture, the countdown, and text.
 - New: pair by QR code. The PC shows a QR code; the Android app has Remote > Scan QR (or use any phone camera). The PC lists every network address so you can pick the right one, and it works with no internet: same Wi-Fi with no uplink, or the phone joined to the PC's Mobile Hotspot. On Android the app binds to Wi-Fi so a no-internet Wi-Fi is not skipped for mobile data.
-- New: get the phone app from the Remote window. "Phone does not have the app yet?" shows a QR code and a link to the Android download page (GitHub Releases). Tag releases now also carry a stable-named `LiteStream-Studio-Android.apk`. iPhone and anyone without the app can scan the pairing code and use the remote in the phone browser. The phone page also links to the app.
+- New: get the phone app from the Remote window. "Phone does not have the app yet?" shows a QR code and a button that start the Android app download straight from GitHub Releases (`.../releases/latest/download/LiteStream-Studio-Android.apk`). The Android workflow publishes that stable-named APK on every `v*` tag, or when you run it by hand with a release tag. iPhone and anyone without the app can scan the pairing code and use the remote in the phone browser. The phone page also links to the app.
 - Safe by default: off until you turn it on, PIN required, wrong-PIN lockout, and a new PIN signs every phone out.
 
 ## 0.6.0
